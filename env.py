@@ -9,19 +9,24 @@ DOWN = 3
 
 
 class CityEnv(gym.Env):
-
+    """
+    An environment to simulate a city traffic
+    """
     def __init__(self, length=3, width=3, min_distance=10, max_distance=100, min_traffic=1, max_traffic=2,
                  dist_matrix: np.ndarray = None,
                  traffic_matrix: np.ndarray = None):
+        """
+        Initialize the environment
+        """
         self.length = length
         self.width = width
         self.min_distance = min_distance  # minimum distance between vertices
         self.max_distance = max_distance  # maximum distance between vertices
-        self.min_traffic = min_traffic  # minimum traffic occurence between vertices
-        self.max_traffic = max_traffic  # maximum traffic occurence between vertices
+        self.min_traffic = min_traffic  # minimum traffic occurrence between vertices
+        self.max_traffic = max_traffic  # maximum traffic occurrence between vertices
         self.matrix_length = self.length * self.width
         self.pos = (0, 0)
-        self.vertice_matrix = np.reshape(np.arange(0, self.matrix_length), (-1, self.length))
+        self.vertices_matrix = np.reshape(np.arange(0, self.matrix_length), (-1, self.length))
 
         if dist_matrix is None:
             dist_matrix = np.zeros((self.matrix_length, self.matrix_length))
@@ -31,7 +36,7 @@ class CityEnv(gym.Env):
                 if j == i + self.length or j == i - self.length:
                     dist_matrix[j][i] = 1
                 if j == i+1 and j % self.length != 0:
-                    print(i, j)
+                    # print(i, j)
                     dist_matrix[j][i] = 1
                 if j == i-1 and i % self.length != 0:
                     dist_matrix[j][i] = 1
@@ -40,14 +45,33 @@ class CityEnv(gym.Env):
             traffic_matrix = np.ones((self.matrix_length, self.matrix_length))
 
         for k in range(self.matrix_length):
-            dist_matrix[k][k] = 0
+            # dist_matrix[k][k] = 0
             traffic_matrix[k][k] = 0
 
         self.dist_matrix = dist_matrix.copy()
 
+        # TODO: define observation space and boundaries
+        low = np.array([0])
+        high = np.array([0])
+        self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.uint32)
+        self.action_space = gym.spaces.Discrete(4)
+        # TODO: define reward range
+        self.reward_range = [0, 0]
 
-env = CityEnv()
+    def reset(self):
+        """
+        Reset the environment
+        """
+        pass
 
-for row in env.dist_matrix:
-    print(row)
+    def step(self, action):
+        """
+        Performs a step on the environment
+        """
+        pass
 
+    def close(self):
+        """
+        Make sure environment is closed
+        """
+        pass
