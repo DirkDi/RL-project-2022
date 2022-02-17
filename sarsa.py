@@ -1,5 +1,6 @@
 import numpy as np
 import gym
+import logging
 from typing import DefaultDict, Callable, Tuple, List, Hashable
 from _collections import defaultdict
 
@@ -55,8 +56,8 @@ def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.
         lens.append(episode_length)
         train_steps_list.append(num_performed_steps)
         num_performed_steps = 0
-        print(f"Done {episode:4d}/{num_episodes:4d} episodes, total_reward: {cumulative_reward}")
-    print("mean training steps for each run:", np.mean(train_steps_list))
+        logging.info(f'{episode:4d}/{num_episodes:4d} episodes done, episodes total reward: {cumulative_reward}')
+    logging.info(f'mean training steps for each run: {np.mean(train_steps_list)}')
     return rewards, lens, Q
 
 

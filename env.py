@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 import sys
+import logging
 import random
 
 # Actions
@@ -44,6 +45,7 @@ class CityEnv(gym.Env):
                         rand_val = random.randint(min_distance, max_distance)
                         dist_matrix[j][i] = rand_val if init_random else 1
                         dist_matrix[i][j] = rand_val if init_random else 1
+        logging.debug(f'Distance matrix:\n{dist_matrix}')
         # create values for traffic
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_length, self.matrix_length))
@@ -55,7 +57,7 @@ class CityEnv(gym.Env):
                         rand_val = round(random.uniform(min_traffic, max_traffic), 2)
                         traffic_matrix[j][i] = rand_val if init_random else 1
                         traffic_matrix[i][j] = rand_val if init_random else 1
-        print(traffic_matrix)
+        logging.debug(f'Traffic matrix:\n{traffic_matrix}')
 
         if packages is None:
             packages = []
