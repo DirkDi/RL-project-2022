@@ -73,7 +73,7 @@ def main():
             env = CityEnv(init_random=True)
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 100)
+            r, l, Q = sarsa(env, 200)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         else:
             actions = test()
