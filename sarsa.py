@@ -64,11 +64,13 @@ def evaluate_sarsa_policy(Q, env):
     state = env.reset()
     done = False
     policy = make_epsilon_greedy_policy(Q, 0, env.action_space.n)
+    """
     pi = np.zeros_like(env.vertices_matrix)
     for i in range(env.length):
         for j in range(env.width):
             pi[i, j] = choose_action(policy((i, j)))
     print(pi)
+    """
     r_acc = 0
     actions = []
     k = 1
