@@ -24,6 +24,12 @@ class CityEnv(gym.Env):
         """
         Initialize the environment
         """
+        # throw error message if environment is not possible
+        if any(value <= 0 for value in [length, width, min_distance, max_distance, min_traffic, max_traffic,
+                                        num_packages]) or max_distance < min_distance or max_traffic < min_traffic:
+            logging.error('This environment is not possible.')
+            sys.exit(1)
+
         self.length = length
         self.width = width
         self.min_distance = min_distance  # minimum distance between vertices
@@ -61,9 +67,11 @@ class CityEnv(gym.Env):
 
         if packages is None:
             packages = []
-            # for i in range(num_packages):
-            packages.append((0, 9))
-            # packages.append((9, 9))
+            #for i in range(num_packages):
+                #packages.append((random.randint(0, self.length), random.randint(0, self.width)))
+            packages.append((0, 1))
+            packages.append((2, 1))
+        logging.debug(f'Coordinates of packages are: {packages}')
 
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
@@ -123,6 +131,7 @@ class CityEnv(gym.Env):
         meta_info = {}
         # print(1 / reward * 1000, self.pos)
         # sys.exit(0)
+        logging.debug(f'New position after step is {self.pos}')
         return self.pos, -reward, done, meta_info
 
     def close(self):
