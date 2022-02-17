@@ -19,7 +19,8 @@ def choose_action(probability_distribution: np.ndarray) -> int:
     return np.random.choice(np.arange(0, len(probability_distribution)), p=probability_distribution)
 
 
-def td_update(Q: DefaultDict[int, np.ndarray], state: int, action: int, reward: float, next_state: int, next_action: int, gamma: float, alpha: float, done: bool) -> float:
+def td_update(Q: DefaultDict[int, np.ndarray], state: int, action: int, reward: float, next_state: int,
+              next_action: int, gamma: float, alpha: float, done: bool) -> float:
     current_q_value = Q[state][action]
     td_target = reward
     if not done:
@@ -47,6 +48,7 @@ def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.
             Q[state][action] = td_update(Q, state, action, reward, next_state, next_action, gamma, alpha, done)
             policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
             cumulative_reward += reward
+            #print(cumulative_reward)
             episode_length += 1
             state = next_state
         rewards.append(cumulative_reward)
@@ -62,8 +64,8 @@ def evaluate_sarsa_policy(Q, env):
     state = env.reset()
     done = False
     policy = make_epsilon_greedy_policy(Q, 0, env.action_space.n)
-    pi = np.zeros_like(env.board)
-    for i in range(env.height):
+    pi = np.zeros_like(env.vertices_matrix)
+    for i in range(env.length):
         for j in range(env.width):
             pi[i, j] = choose_action(policy((i, j)))
     print(pi)

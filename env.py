@@ -1,5 +1,7 @@
 import numpy as np
 import gym
+import sys
+import random
 
 # Actions
 UP = 0
@@ -12,11 +14,12 @@ class CityEnv(gym.Env):
     """
     An environment to simulate a city traffic
     """
+
     def __init__(self, length=3, width=3, min_distance=10, max_distance=100, min_traffic=1, max_traffic=2,
                  dist_matrix: np.ndarray = None,
                  traffic_matrix: np.ndarray = None,
                  packages=None,
-                 num_packages: int = 1):
+                 num_packages: int = 2, init_random=False):
         """
         Initialize the environment
         """
@@ -28,42 +31,37 @@ class CityEnv(gym.Env):
         self.max_traffic = max_traffic  # maximum traffic occurrence between vertices
         self.matrix_length = self.length * self.width
         self.pos = 0, 0
+        self.prev_pos = 0, 0
         self.vertices_matrix = np.reshape(np.arange(0, self.matrix_length), (-1, self.length))
 
         if dist_matrix is None:
             dist_matrix = np.zeros((self.matrix_length, self.matrix_length))
-
             for i in range(self.matrix_length):
                 for j in range(self.matrix_length):
-                    if j == i + self.length or j == i - self.length:
-                        dist_matrix[j][i] = 1
-                    if j == i+1 and j % self.length != 0:
-                        # print(i, j)
-                        dist_matrix[j][i] = 1
-                    if j == i-1 and i % self.length != 0:
-                        dist_matrix[j][i] = 1
-
+                    if dist_matrix[j][i] != 0:
+                        pass
+                    elif j == i + self.length or (j == i + 1 and j % self.length != 0):
+                        rand_val = random.randint(min_distance, max_distance)
+                        dist_matrix[j][i] = rand_val if init_random else 1
+                        dist_matrix[i][j] = rand_val if init_random else 1
+        # create values for traffic
         if traffic_matrix is None:
-            traffic_matrix = np.ones((self.matrix_length, self.matrix_length))
-
+            traffic_matrix = np.zeros((self.matrix_length, self.matrix_length))
             for i in range(self.matrix_length):
                 for j in range(self.matrix_length):
-                    if j == i + self.length or j == i - self.length:
-                        traffic_matrix[j][i] = 1
-                    if j == i + 1 and j % self.length != 0:
-                        # print(i, j)
-                        traffic_matrix[j][i] = 1
-                    if j == i - 1 and i % self.length != 0:
-                        traffic_matrix[j][i] = 1
-
-            for k in range(self.matrix_length):
-                # dist_matrix[k][k] = 0
-                traffic_matrix[k][k] = 0
+                    if traffic_matrix[j][i] != 0:
+                        pass
+                    elif j == i + self.length or (j == i + 1 and j % self.length != 0):
+                        rand_val = round(random.uniform(min_traffic, max_traffic), 2)
+                        traffic_matrix[j][i] = rand_val if init_random else 1
+                        traffic_matrix[i][j] = rand_val if init_random else 1
+        print(traffic_matrix)
 
         if packages is None:
             packages = []
-            for i in range(num_packages):
-                packages.append((2, 1))
+            # for i in range(num_packages):
+            packages.append((0, 9))
+            # packages.append((9, 9))
 
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
@@ -103,23 +101,27 @@ class CityEnv(gym.Env):
         elif action == 3 and j < self.width - 1:
             y = j + 1
         else:
-            return self.pos, 0, False, {}
+            return self.pos, -10000, False, {}
         old_vertex = self.vertices_matrix[i, j]
         new_vertex = self.vertices_matrix[x, y]
         dist = self.dist_matrix[new_vertex, old_vertex]
         traffic_flow = self.traffic_matrix[new_vertex, old_vertex]
         # print(old_vertex, new_vertex, dist, traffic_flow)
-        self.pos = i, j
+        self.pos = x, y
         m, n = self.packages[0]
         if (x, y) == (m, n):
-            self.packages.pop()
+            while (x, y) in self.packages:
+                self.packages.remove((x, y))
             dist_to_package = 0
         else:
             dist_to_package = abs(m - x) + abs(n - y)
-        reward = dist * traffic_flow + 0.1 * dist_to_package
+
+        reward = 10 * (dist * traffic_flow + 2 * dist_to_package)  # TODO: check if reward has good value
         done = len(self.packages) == 0
         meta_info = {}
-        return self.pos, 1 / reward * 1000, done, meta_info
+        # print(1 / reward * 1000, self.pos)
+        # sys.exit(0)
+        return self.pos, -reward, done, meta_info
 
     def close(self):
         """
