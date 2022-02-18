@@ -12,6 +12,7 @@ def argsparser():
     parser.add_argument("-d", "--debug", action="store_true", help="debug output")
     parser.add_argument('--mode', '-m', type=str, default='normal',
                         help='choose the mode normal or experimental (experimental env)')
+    parser.add_argument("--static", "-s", action="store_true", help="disables random distance generation")
     args = parser.parse_args()
     return args
 
@@ -70,10 +71,10 @@ def main():
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=True)
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 200)
+            r, l, Q = sarsa(env, 1000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         else:
             actions = test()

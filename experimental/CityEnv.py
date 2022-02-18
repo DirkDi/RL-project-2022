@@ -137,7 +137,7 @@ class CityEnv(gym.Env):
             dist_to_next_package = self.height * self.width
             for pack_x, pack_y in self.packages:
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - new_pos_x) + abs(pack_y - new_pos_y))
-            reward = 1 / dist_to_next_package
+            reward = 1 / (dist * traffic_flow + dist_to_next_package)
         meta_info = {}
         return (self.position, packages_count), reward - self.timer, done, meta_info
 
