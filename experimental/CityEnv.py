@@ -56,12 +56,12 @@ class CityEnv(gym.Env):
             packages = []
             packages.append((2, 1))
 
-        # Indexing scheme: matrix[start_vertex, target_vertex]
+        # NOTE: Indexing scheme: matrix[start_vertex, target_vertex]
         self.dist_matrix = dist_matrix
         self.traffic_matrix = traffic_matrix
         self.packages = []
         self.packages_initial = packages
-        self.position = 0, 0
+        self.pos = 0, 0
         self.timer = 0
 
         # state := ((x, y), amount of not collected packages)
@@ -88,10 +88,10 @@ class CityEnv(gym.Env):
         """
         Reset the environment
         """
-        self.position = 0, 0
+        self.pos = 0, 0
         self.timer = 0
         self.packages = self.packages_initial.copy()
-        return self.position, len(self.packages)
+        return self.pos, len(self.packages)
 
     def step(self, action):
         """
@@ -102,7 +102,7 @@ class CityEnv(gym.Env):
             raise RuntimeError(f"{action} is not a valid action (needs to be between 0 and 3)")
 
         self.timer += 1
-        pos_x, pos_y = self.position
+        pos_x, pos_y = self.pos
         new_pos_x, new_pos_y = pos_x, pos_y
         if action == UP and pos_x > 0:
             new_pos_x -= 1
@@ -113,33 +113,30 @@ class CityEnv(gym.Env):
         elif action == RIGHT and pos_y < self.width - 1:
             new_pos_y += 1
         else:
-            dist_to_next_package = self.height * self.width
-            reward = 0
-            for pack_x, pack_y in self.packages:
-                dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
-                reward = 1 / dist_to_next_package
-            return (self.position, len(self.packages)), reward - self.timer, False, {}
+            return (self.pos, len(self.packages)), -1 - self.timer, False, {}
 
-        self.position = new_pos_x, new_pos_y
+        self.pos = new_pos_x, new_pos_y
+
+        # calculate reward
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[start_vertex, target_vertex]
         traffic_flow = self.traffic_matrix[start_vertex, target_vertex]
+        reward = -(dist * traffic_flow)
+
+        # count packages and remove collected ones
         if (new_pos_x, new_pos_y) in self.packages:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
-
         packages_count = len(self.packages)
         done = packages_count == 0
-        if done:
-            reward = 2
-        else:
-            dist_to_next_package = self.height * self.width
-            for pack_x, pack_y in self.packages:
-                dist_to_next_package = min(dist_to_next_package, abs(pack_x - new_pos_x) + abs(pack_y - new_pos_y))
-            reward = 1 / (dist * traffic_flow + dist_to_next_package)
+
+        # add timer impact
+        if not done:
+            reward -= self.timer
+
         meta_info = {}
-        return (self.position, packages_count), reward - self.timer, done, meta_info
+        return (self.pos, packages_count), reward, done, meta_info
 
     def close(self):
         """

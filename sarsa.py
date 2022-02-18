@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 import gym
 import logging
 from typing import DefaultDict, Callable, Tuple, List, Hashable
@@ -35,6 +36,7 @@ def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.
     lens = []
     train_steps_list = []
     num_performed_steps = 0
+    pbar = tqdm(total=num_episodes)
     for episode in range(1, num_episodes + 1):
         policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
         state = env.reset()
@@ -56,7 +58,9 @@ def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.
         lens.append(episode_length)
         train_steps_list.append(num_performed_steps)
         num_performed_steps = 0
-        logging.info(f'{episode:4d}/{num_episodes:4d} episodes done, episodes total reward: {cumulative_reward}')
+        # logging.info(f'{episode:4d}/{num_episodes:4d} episodes done, episodes total reward: {cumulative_reward}')
+        pbar.set_postfix({"episode": episode, "episodes total reward": cumulative_reward})
+        pbar.update(1)
     logging.info(f'mean training steps for each run: {np.mean(train_steps_list)}')
     return rewards, lens, Q
 

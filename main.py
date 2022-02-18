@@ -28,28 +28,71 @@ def test():
     """
     To experiment with some things
     """
-    env = Env(height=3, width=3, packages=[(0, 2), (2, 2)])
+    """
+    NOTE: Important!
+        Indexing scheme: row entry := start vertex
+                     column entry := target vertex
+    """
+    dist_matrix = np.array([
+        [0, 1, 0, 1, 0, 0, 0, 0, 0],
+        [1, 0, 1, 0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 9000, 0, 0, 0],
+        [1, 0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 0, 9000, 0, 1, 0, 0, 0, 9000],
+        [0, 0, 0, 1, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1, 0, 1, 0, 1],
+        [0, 0, 0, 0, 0, 9000, 0, 1, 0]
+    ])
+    env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix)
     env.reset()
     """
-    print(env.position)
-    print(env.packages)
-    print(env.step(1))
-    print(env.step(2))
-    print(env.step(1))
-    print(env.step(3))
+    print(env.dist_matrix)
+    cum_r = 0
+    _, r, d, _ = env.step(3)
+    cum_r += r
+    print(cum_r, d)
+    _, r, d, _ = env.step(3)
+    cum_r += r
+    print(cum_r, d)
+    _, r, d, _ = env.step(1)
+    cum_r += r
+    print(cum_r, d)
+    _, r, d, _ = env.step(1)
+    cum_r += r
+    print(cum_r, d)
+
+    print(env.reset())
+    cum_r = 0
+    s, r, d, _ = env.step(3)
+    cum_r += r
+    print(s, cum_r, d)
+    s, r, d, _ = env.step(3)
+    cum_r += r
+    print(s, cum_r, d)
+    s, r, d, _ = env.step(2)
+    cum_r += r
+    print(s, cum_r, d)
+    s, r, d, _ = env.step(1)
+    cum_r += r
+    print(s, cum_r, d)
+    s, r, d, _ = env.step(1)
+    cum_r += r
+    print(s, cum_r, d)
+    s, r, d, _ = env.step(3)
+    cum_r += r
+    print(s, cum_r, d)
+    return
     """
-    r, l, Q = sarsa(env, 1000)
-    policy = make_epsilon_greedy_policy(Q, 0, env.action_space.n)
-    pi = np.zeros_like(env.vertices_matrix)
-    # for state, actions in Q.items():
-    #     print(state, np.argmax(actions))
-    for l in range(2, 0, -1):
-        for i in range(env.height):
-            for j in range(env.width):
-                pi[i, j] = choose_action(policy((i, j, l)))
-        logging.debug(f'Current policy: {pi}')
+    r, l, Q = sarsa(env, 100)
+
+    pi = np.zeros((3, env.height, env.width))
+    for ((x, y), c), actions in Q.items():
+        pi[c, x, y] = np.argmax(actions)
+    print(pi)
 
     cum_r, actions = evaluate_sarsa_policy(Q, env)
+    print(cum_r)
     return actions
 
 
@@ -74,7 +117,7 @@ def main():
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 1000)
+            r, l, Q = sarsa(env, 100)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         else:
             actions = test()
