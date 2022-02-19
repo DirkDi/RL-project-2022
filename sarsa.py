@@ -6,28 +6,26 @@ from typing import DefaultDict, Callable, Tuple, List, Hashable
 from _collections import defaultdict
 
 
-def make_epsilon_greedy_policy(Q: DefaultDict[int, np.ndarray], epsilon: float, n_actions: int) -> Callable[[int], np.ndarray]:
-    def policy_fn(observation: int) -> np.ndarray:
+def make_epsilon_greedy_policy(Q: DefaultDict[Tuple, np.ndarray], epsilon: float, n_actions: int) -> Callable[[np.ndarray], int]:
+    def policy_fn(observation: np.ndarray) -> int:
+        obs = tuple(observation.tolist())
         new_policy = np.ones((n_actions,)) * (epsilon / n_actions)
-        policy = Q[observation]
+        policy = Q[obs]
         indices = np.where(policy == policy.max())[0]
         new_policy[np.random.choice(indices)] += 1 - epsilon
-        return new_policy
+        return np.random.choice(np.arange(0, n_actions), p=new_policy)
 
     return policy_fn
 
 
-def choose_action(probability_distribution: np.ndarray) -> int:
-    return np.random.choice(np.arange(0, len(probability_distribution)), p=probability_distribution)
-
-
-def td_update(Q: DefaultDict[int, np.ndarray], state: int, action: int, reward: float, next_state: int,
-              next_action: int, gamma: float, alpha: float, done: bool) -> float:
+def td_update(Q: DefaultDict[Tuple, np.ndarray], state: np.ndarray, action: int, reward: float,
+              next_state: np.ndarray, next_action: int, gamma: float, alpha: float, done: bool) -> float:
+    state = tuple(state.tolist())
     current_q_value = Q[state][action]
     td_target = reward
     if not done:
-        td_target += gamma * Q[next_state][next_action]
-    return current_q_value + alpha * (td_target - current_q_value)
+        td_target += gamma * Q[tuple(next_state.tolist())][next_action]
+    Q[state][action] = current_q_value + alpha * (td_target - current_q_value)
 
 
 def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.5, epsilon: float = 0.1) -> Tuple[List[float], List[int], DefaultDict[Hashable, np.ndarray]]:
@@ -45,13 +43,12 @@ def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.
         cumulative_reward = 0
         while not done:
             num_performed_steps += 1
-            action = choose_action(policy(state))
+            action = policy(state)
             next_state, reward, done, _ = env.step(action)
-            next_action = choose_action(policy(next_state))
-            Q[state][action] = td_update(Q, state, action, reward, next_state, next_action, gamma, alpha, done)
+            next_action = policy(next_state)
+            td_update(Q, state, action, reward, next_state, next_action, gamma, alpha, done)
             policy = make_epsilon_greedy_policy(Q, epsilon, env.action_space.n)
             cumulative_reward += reward
-            #print(cumulative_reward)
             episode_length += 1
             state = next_state
         rewards.append(cumulative_reward)
@@ -69,18 +66,11 @@ def evaluate_sarsa_policy(Q, env):
     state = env.reset()
     done = False
     policy = make_epsilon_greedy_policy(Q, 0, env.action_space.n)
-    """
-    pi = np.zeros_like(env.vertices_matrix)
-    for i in range(env.length):
-        for j in range(env.width):
-            pi[i, j] = choose_action(policy((i, j)))
-    print(pi)
-    """
     r_acc = 0
     actions = []
     k = 1
     while not done:
-        action = choose_action(policy(state))
+        action = policy(state)
         actions.append(action)
         new_state, reward, done, _ = env.step(action)
         r_acc += reward

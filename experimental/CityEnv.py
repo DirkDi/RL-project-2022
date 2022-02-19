@@ -91,7 +91,7 @@ class CityEnv(gym.Env):
         self.pos = 0, 0
         self.timer = 0
         self.packages = self.packages_initial.copy()
-        return self.pos, len(self.packages)
+        return np.array([0, 0, len(self.packages)])
 
     def step(self, action):
         """
@@ -113,7 +113,7 @@ class CityEnv(gym.Env):
         elif action == RIGHT and pos_y < self.width - 1:
             new_pos_y += 1
         else:
-            return (self.pos, len(self.packages)), -1, False, {}
+            return np.array([pos_x, pos_y, len(self.packages)]), -1, False, {}
 
         self.pos = new_pos_x, new_pos_y
 
@@ -136,7 +136,7 @@ class CityEnv(gym.Env):
         #     reward -= self.timer
 
         meta_info = {}
-        return (self.pos, packages_count), reward, done, meta_info
+        return np.array([new_pos_x, new_pos_y, packages_count]), reward, done, meta_info
 
     def close(self):
         """

@@ -37,16 +37,17 @@ def test():
                      column entry := target vertex
     """
     dist_matrix = np.array([
-        [0, 1, 0, 1, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 100, 0, 0, 0],
+        [0, 20, 0, 1, 0, 0, 0, 0, 0],
+        [20, 0, 1, 0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 20, 0, 0, 0],
         [1, 0, 0, 0, 1, 0, 1, 0, 0],
         [0, 1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 0, 100, 0, 1, 0, 0, 0, 100],
+        [0, 0, 20, 0, 1, 0, 0, 0, 20],
         [0, 0, 0, 1, 0, 0, 0, 1, 0],
         [0, 0, 0, 0, 1, 0, 1, 0, 1],
-        [0, 0, 0, 0, 0, 100, 0, 1, 0]
+        [0, 0, 0, 0, 0, 20, 0, 1, 0]
     ])
+    """
     dist_matrix = np.array([
         [0, 66, 0, 24, 0, 0, 0, 0, 0],
         [66, 0, 10, 0, 21, 0, 0, 0, 0],
@@ -58,6 +59,7 @@ def test():
         [0, 0, 0, 0, 20, 0, 55, 0, 40],
         [0, 0, 0, 0, 0, 22, 0, 40, 0]
     ])
+    """
     env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix)
     env.reset()
     """
@@ -98,10 +100,10 @@ def test():
     print(s, cum_r, d)
     return
     """
-    r, l, Q = sarsa(env, 20000)
+    r, l, Q = sarsa(env, 25000)
 
     pi = np.zeros((3, env.height, env.width))
-    for ((x, y), c), actions in Q.items():
+    for (x, y, c), actions in Q.items():
         pi[c, x, y] = np.argmax(actions)
     print(pi)
 
