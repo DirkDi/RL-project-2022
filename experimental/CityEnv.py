@@ -113,7 +113,7 @@ class CityEnv(gym.Env):
         elif action == RIGHT and pos_y < self.width - 1:
             new_pos_y += 1
         else:
-            return (self.pos, len(self.packages)), -1 - self.timer, False, {}
+            return (self.pos, len(self.packages)), -1, False, {}
 
         self.pos = new_pos_x, new_pos_y
 
@@ -132,8 +132,8 @@ class CityEnv(gym.Env):
         done = packages_count == 0
 
         # add timer impact
-        if not done:
-            reward -= self.timer
+        # if not done:
+        #     reward -= self.timer
 
         meta_info = {}
         return (self.pos, packages_count), reward, done, meta_info

@@ -24,6 +24,7 @@ class CityEnv(gym.Env):
         """
         Initialize the environment
         """
+        super(CityEnv, self).__init__()
         # throw error message if environment is not possible
         if any(value <= 0 for value in [height, width, min_distance, max_distance, min_traffic, max_traffic,
                                         num_packages]) or max_distance < min_distance or max_traffic < min_traffic:
@@ -80,9 +81,9 @@ class CityEnv(gym.Env):
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
 
-        low = np.array([0, 0])
-        high = np.array([self.height, self.width])
-        self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.uint32)
+        low = np.array([0, 0, 0])
+        high = np.array([self.height, self.width, num_packages])
+        self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = gym.spaces.Discrete(4)
         # TODO: define reward range
         self.reward_range = [0, 0]
@@ -94,7 +95,7 @@ class CityEnv(gym.Env):
         self.timer = 0
         self.pos = 0, 0
         self.packages = self.packages_initial.copy()
-        return self.pos, len(self.packages)
+        return np.array([0, 0, len(self.packages)]).astype(dtype=np.float32)
 
     def step(self, action):
         """
@@ -116,24 +117,30 @@ class CityEnv(gym.Env):
         elif action == RIGHT and pos_y < self.width - 1:
             new_pos_y += 1
         else:
+            """
             dist_to_next_package = self.height * self.width
             reward = 0
             for pack_x, pack_y in self.packages:
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
                 reward = 1 / dist_to_next_package
-            return (self.pos, len(self.packages)), reward - self.timer, False, {}
+            """
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), 0, False, {}
 
         self.pos = new_pos_x, new_pos_y
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[start_vertex, target_vertex]
         traffic_flow = self.traffic_matrix[start_vertex, target_vertex]
+        reward = -(dist * traffic_flow)
+        reward = 0
         if (new_pos_x, new_pos_y) in self.packages:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
+            reward = (1 / len(self.packages)) if len(self.packages) else 2
 
         packages_count = len(self.packages)
         done = packages_count == 0
+        """
         if done:
             reward = 2
         else:
@@ -141,11 +148,15 @@ class CityEnv(gym.Env):
             for pack_x, pack_y in self.packages:
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - new_pos_x) + abs(pack_y - new_pos_y))
             reward = 50 * (1 / (dist * traffic_flow + 10 * dist_to_next_package))
-        meta_info = {}
-        return (self.pos, packages_count), reward - self.timer, done, meta_info
+        """
+        meta_info = {'render.modes': ['console']}
+        return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.float32), reward, done, meta_info
 
     def close(self):
         """
         Make sure environment is closed
         """
+        pass
+
+    def render(self, mode="human"):
         pass

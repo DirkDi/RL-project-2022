@@ -15,16 +15,16 @@ def ppo_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
     return model
 
 
-def dqn_agent(env, total_timestamps=1000, log_interval=10, verbose=1):
+def dqn_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
     model = DQN("MlpPolicy", env, verbose=verbose)
-    model.learn(total_timesteps=total_timestamps, log_interval=log_interval)
+    model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('dqno_city')
     return model
 
 
-def a2c_agent(env, total_timestamps=1000, log_interval=10, verbose=1):
+def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
     model = A2C("MlpPolicy", env, verbose=verbose)
-    model.learn(total_timesteps=total_timestamps, log_interval=log_interval)
+    model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('a2c_city')
     return model
 
@@ -36,5 +36,6 @@ def run_agent(env, model):
         action, _states = model.predict(obs, deterministic=True)
         actions.append(action)
         obs, reward, done, info = env.step(action)
+        # print(action)
         if done:
             return actions

@@ -59,7 +59,7 @@ def sarsa(env: gym.Env, num_episodes: int, gamma: float = 1.0, alpha: float = 0.
         train_steps_list.append(num_performed_steps)
         num_performed_steps = 0
         # logging.info(f'{episode:4d}/{num_episodes:4d} episodes done, episodes total reward: {cumulative_reward}')
-        pbar.set_postfix({"episode": episode, "episodes total reward": cumulative_reward})
+        pbar.set_postfix({"episodes total reward": cumulative_reward})
         pbar.update(1)
     logging.info(f'mean training steps for each run: {np.mean(train_steps_list)}')
     return rewards, lens, Q
