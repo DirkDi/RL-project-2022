@@ -140,6 +140,10 @@ class CityEnv(gym.Env):
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[start_vertex, target_vertex]
         traffic_flow = self.traffic_matrix[start_vertex, target_vertex]
+        # action is not allowed if there is no vertex between both points (value is 0 for dist/traffic_flow)
+        if not traffic_flow * dist:
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), 0, False, {
+                'render.modes': ['console']}
         # reward = -(dist * traffic_flow)
         reward = (1 / (dist * traffic_flow)) * 100
         if (new_pos_x, new_pos_y) in self.packages:
