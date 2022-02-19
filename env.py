@@ -3,6 +3,7 @@ import gym
 import sys
 import logging
 import random
+from collections import Counter
 
 # Actions
 UP = 0
@@ -38,10 +39,13 @@ class CityEnv(gym.Env):
         self.min_traffic = min_traffic  # minimum traffic occurrence between vertices
         self.max_traffic = max_traffic  # maximum traffic occurrence between vertices
         self.matrix_height = self.height * self.width
-        self.pos = 0, 0
-        self.prev_pos = 0, 0
+        self.init_pos = 0, 0  # random.randint(0, self.height - 1), random.randint(0, self.width - 1)
+        self.pos = self.init_pos
+        self.prev_pos = self.init_pos
         self.vertices_matrix = np.reshape(np.arange(0, self.matrix_height), (-1, self.height))
         self.timer = 0
+        self.num_packages = num_packages
+        self.already_driven = [self.pos]  # contains the points where the agent already was
 
         if dist_matrix is None:
             dist_matrix = np.zeros((self.matrix_height, self.matrix_height))
@@ -66,7 +70,6 @@ class CityEnv(gym.Env):
                         traffic_matrix[j, i] = rand_val if init_random else 1
                         traffic_matrix[i, j] = rand_val if init_random else 1
         logging.debug(f'Traffic matrix:\n{traffic_matrix}')
-
         if packages is None:
             packages = []
             if init_random:
@@ -75,27 +78,28 @@ class CityEnv(gym.Env):
             else:
                 packages.append((2, 1))
         logging.debug(f'Coordinates of packages are: {packages}')
-
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
-
+        self.weighted_map = self.get_map()
+        logging.debug(f'Weighted map matrix:\n{self.weighted_map}')
         low = np.array([0, 0, 0])
         high = np.array([self.height, self.width, num_packages])
         self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = gym.spaces.Discrete(4)
         # TODO: define reward range
         self.reward_range = [0, 0]
+        self.already_driven = [(0, 0)]
 
     def reset(self):
         """
         Reset the environment
         """
         self.timer = 0
-        self.pos = 0, 0
+        self.pos = self.init_pos
         self.packages = self.packages_initial.copy()
-        return np.array([0, 0, len(self.packages)]).astype(dtype=np.float32)
+        return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.float32)
 
     def step(self, action):
         """
@@ -124,19 +128,25 @@ class CityEnv(gym.Env):
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
                 reward = 1 / dist_to_next_package
             """
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), 0, False, {}
-
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), 0, False, {
+                'render.modes': ['console']}
         self.pos = new_pos_x, new_pos_y
+        if self.pos in self.already_driven:
+            self.already_driven.append(self.pos)
+            # count = Counter(self.already_driven)[self.pos]
+            return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -10, False, \
+                   {'render.modes': ['console']}
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[start_vertex, target_vertex]
         traffic_flow = self.traffic_matrix[start_vertex, target_vertex]
-        reward = -(dist * traffic_flow)
-        reward = 0
+        # reward = -(dist * traffic_flow)
+        reward = (1 / (dist * traffic_flow)) * 100
         if (new_pos_x, new_pos_y) in self.packages:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
-            reward = (1 / len(self.packages)) if len(self.packages) else 2
+            self.already_driven = []  # reset already driven array
+            reward = 10
 
         packages_count = len(self.packages)
         done = packages_count == 0
@@ -150,6 +160,7 @@ class CityEnv(gym.Env):
             reward = 50 * (1 / (dist * traffic_flow + 10 * dist_to_next_package))
         """
         meta_info = {'render.modes': ['console']}
+        self.already_driven.append((new_pos_x, new_pos_y))
         return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.float32), reward, done, meta_info
 
     def close(self):
@@ -160,3 +171,11 @@ class CityEnv(gym.Env):
 
     def render(self, mode="human"):
         pass
+
+    def get_map(self):
+        nodes = self.height * self.width
+        map_matrix = np.zeros((nodes, nodes))
+        for i in range(nodes):
+            for j in range(nodes):
+                map_matrix[i, j] = self.dist_matrix[i, j] * self.traffic_matrix[i, j]
+        return map_matrix

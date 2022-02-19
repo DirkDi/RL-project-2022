@@ -133,7 +133,7 @@ def main():
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 100000)
+            r, l, Q = sarsa(env, 1000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         elif mode == 'a2c':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
