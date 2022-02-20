@@ -44,7 +44,7 @@ def test():
         [0, 1, 0, 0, 0, 20, 0, 0, 0],
         [1, 0, 0, 0, 1, 0, 1, 0, 0],
         [0, 1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 0, 20, 0, 1, 0, 0, 0, 20],
+        [0, 0, 20, 0, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 0, 0, 0, 1, 0],
         [0, 0, 0, 0, 1, 0, 1, 0, 1],
         [0, 0, 0, 0, 0, 20, 0, 1, 0]
@@ -64,44 +64,9 @@ def test():
     """
     env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix)
     env.reset()
-    """
-    print(env.dist_matrix)
-    cum_r = 0
-    _, r, d, _ = env.step(3)
-    cum_r += r
-    print(cum_r, d)
-    _, r, d, _ = env.step(3)
-    cum_r += r
-    print(cum_r, d)
-    _, r, d, _ = env.step(1)
-    cum_r += r
-    print(cum_r, d)
-    _, r, d, _ = env.step(1)
-    cum_r += r
-    print(cum_r, d)
+    # print(env.validate_accessibility(0, 1))
+    return 0, []
 
-    print(env.reset())
-    cum_r = 0
-    s, r, d, _ = env.step(3)
-    cum_r += r
-    print(s, cum_r, d)
-    s, r, d, _ = env.step(3)
-    cum_r += r
-    print(s, cum_r, d)
-    s, r, d, _ = env.step(2)
-    cum_r += r
-    print(s, cum_r, d)
-    s, r, d, _ = env.step(1)
-    cum_r += r
-    print(s, cum_r, d)
-    s, r, d, _ = env.step(1)
-    cum_r += r
-    print(s, cum_r, d)
-    s, r, d, _ = env.step(3)
-    cum_r += r
-    print(s, cum_r, d)
-    return
-    """
     r, l, Q = sarsa(env, 25000)
 
     pi = np.zeros((3, env.height, env.width))

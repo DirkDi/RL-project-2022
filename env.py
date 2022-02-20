@@ -27,11 +27,16 @@ class CityEnv(gym.Env):
         """
         super(CityEnv, self).__init__()
         # throw error message if environment is not possible
+        assert np.all(np.array([height, width, min_distance, max_distance,
+                                min_traffic, max_traffic, num_packages]) > 0), "all arguments must be non-negative!"
+        assert min_distance < max_distance and min_traffic < max_traffic, \
+            "minimum values have to be lower than maximum values!"
+        """
         if any(value <= 0 for value in [height, width, min_distance, max_distance, min_traffic, max_traffic,
                                         num_packages]) or max_distance < min_distance or max_traffic < min_traffic:
             logging.error('Environment out of range.')
             sys.exit(1)
-
+        """
         self.height = height
         self.width = width
         self.min_distance = min_distance  # minimum distance between vertices
@@ -60,6 +65,7 @@ class CityEnv(gym.Env):
                         rand_val = random.randint(min_distance, max_distance)
                         dist_matrix[j, i] = rand_val if init_random else 1
                         dist_matrix[i, j] = rand_val if init_random else 1
+
         # create values for traffic
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_height, self.matrix_height))
@@ -71,6 +77,15 @@ class CityEnv(gym.Env):
                         rand_val = round(random.uniform(min_traffic, max_traffic), 2)
                         traffic_matrix[j, i] = rand_val if init_random else 1
                         traffic_matrix[i, j] = rand_val if init_random else 1
+
+        self.dist_matrix = dist_matrix.copy()
+        self.traffic_matrix = traffic_matrix.copy()
+
+        # Check if city graph is connected
+        for i in range(self.matrix_height):
+            for j in range(self.matrix_height):
+                assert self.validate_accessibility(i, j), "The city graph is not connected!"
+
         if packages is None:
             packages = []
             if init_random:
@@ -79,8 +94,6 @@ class CityEnv(gym.Env):
             else:
                 packages.append((2, 1))
         logging.debug(f'Coordinates of packages are: {packages}')
-        self.dist_matrix = dist_matrix.copy()
-        self.traffic_matrix = traffic_matrix.copy()
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
         self.weighted_map = self.get_map()
@@ -259,17 +272,19 @@ class CityEnv(gym.Env):
                 map_matrix[i, j] = self.dist_matrix[i, j] * self.traffic_matrix[i, j]
         return map_matrix
 
-    def validate_accessibility(self, start, target, visited=None):
-        print(start, target)
-        if self.weighted_map[target, start]:
+    def validate_accessibility(self, start_vertex, target_vertex):
+        if start_vertex == target_vertex:
             return True
-        else:
-            if visited:
-                visited.append(start)
-            else:
-                visited = [start]
-            results = []
-            for i, value in enumerate(self.weighted_map[:, start]):
-                if value and i not in visited:
-                    results.append(self.validate_accessibility(i, target, visited))
-            return True if True in results else False
+        queue = [start_vertex]
+        explored = []
+        while len(queue):
+            vertex = queue.pop()
+            explored.append(vertex)
+            for next_vertex in np.argwhere(self.dist_matrix[:, vertex] > 0).reshape(-1):
+                if next_vertex in explored:
+                    continue
+                if next_vertex == target_vertex:
+                    return True
+                explored.append(next_vertex)
+                queue.append(next_vertex)
+        return False

@@ -52,13 +52,19 @@ class CityEnv(gym.Env):
                             target_vertex = self.vertices_matrix[a, b]
                             traffic_matrix[start_vertex, target_vertex] = 1
 
+        # NOTE: Indexing scheme: matrix[start_vertex, target_vertex]
+        self.dist_matrix = dist_matrix
+        self.traffic_matrix = traffic_matrix
+
+        # Check if city graph is connected
+        for i in range(matrix_size):
+            for j in range(matrix_size):
+                assert self.validate_accessibility(i, j), "The city graph is not connected!"
+
         if packages is None:
             packages = []
             packages.append((2, 1))
 
-        # NOTE: Indexing scheme: matrix[start_vertex, target_vertex]
-        self.dist_matrix = dist_matrix
-        self.traffic_matrix = traffic_matrix
         self.packages = []
         self.packages_initial = packages
         self.pos = 0, 0
@@ -143,3 +149,20 @@ class CityEnv(gym.Env):
         Make sure environment is closed
         """
         pass
+
+    def validate_accessibility(self, start_vertex, target_vertex):
+        if start_vertex == target_vertex:
+            return True
+        queue = [start_vertex]
+        explored = []
+        while len(queue):
+            vertex = queue.pop()
+            explored.append(vertex)
+            for next_vertex in np.argwhere(self.dist_matrix[vertex] > 0).reshape(-1):
+                if next_vertex in explored:
+                    continue
+                if next_vertex == target_vertex:
+                    return True
+                explored.append(next_vertex)
+                queue.append(next_vertex)
+        return False
