@@ -32,10 +32,12 @@ def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
 def run_agent(env, model):
     obs = env.reset()
     actions = []
+    cum_r = 0
     while True:  # TODO check if loop is correct for all agents
         action, _states = model.predict(obs, deterministic=True)
         actions.append(action)
         obs, reward, done, info = env.step(action)
+        cum_r += reward
         # print(action)
         if done:
-            return actions
+            return cum_r, actions

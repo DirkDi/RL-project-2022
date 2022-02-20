@@ -16,6 +16,8 @@ def argsparser():
     parser.add_argument('--mode', '-m', type=str, default='normal',
                         help='choose the mode normal or experimental (experimental env)')
     parser.add_argument("--static", "-s", action="store_true", help="disables random distance generation")
+    parser.add_argument("-b", "--bidirectional", action="store_true", help="deactivates one way streets")
+    parser.add_argument("-i", "--interconnected", action="store_true", help="deactivates construction sites")
     args = parser.parse_args()
     return args
 
@@ -108,8 +110,23 @@ def test():
     print(pi)
 
     cum_r, actions = evaluate_sarsa_policy(Q, env)
-    print(cum_r)
-    return actions
+    return cum_r, actions
+
+
+def random_agent(env):
+    state = env.reset()
+    done = False
+    r_acc = 0
+    actions = []
+    k = 1
+    while not done:
+        action = env.action_space.sample()
+        actions.append(action)
+        new_state, reward, done, _ = env.step(action)
+        r_acc += reward
+        state = new_state
+        k += 1
+    return r_acc, actions
 
 
 def main():
@@ -122,39 +139,44 @@ def main():
     logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
     # check which method should be used
     mode = args.mode.lower()
-    if mode not in ['normal', 'experimental', 'a2c', 'ppo1', 'dqn']:
+    if mode not in ['normal', 'experimental', 'random', 'a2c', 'ppo1', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
-    seeds = [1234]  # list of seeds for experiments
+    seeds = [4321]  # list of seeds for experiments
     for seed in seeds:
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)],
+                          one_way=not args.bidirectional, construction_sites=not args.interconnected)
             # env.reset()
             # print(env.step(1))
             r, l, Q = sarsa(env, 1000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
+        elif mode == 'random':
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
+            cum_r, actions = random_agent(env)
         elif mode == 'a2c':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
             check_env(env, warn=True)
-            model = a2c_agent(env, total_timesteps=25000, log_interval=1000)
+            model = a2c_agent(env, total_timesteps=100000, log_interval=1000)
             print("training")
-            actions = run_agent(env, model)
+            cum_r, actions = run_agent(env, model)
         elif mode == 'ppo1':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
             check_env(env, warn=True)
             model = ppo_agent(env)
             print("training")
-            actions = run_agent(env, model)
+            cum_r, actions = run_agent(env, model)
         elif mode == 'dqn':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
             check_env(env, warn=True)
             model = dqn_agent(env)
             print("training")
-            actions = run_agent(env, model)
+            cum_r, actions = run_agent(env, model)
         else:
-            actions = test()
+            cum_r, actions = test()
+        logging.info(f'The cummulative reward is {cum_r}')
         logging.info(f'The optimal action sequence is {actions}')
 
 
