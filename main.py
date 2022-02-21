@@ -113,7 +113,7 @@ def main():
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)],
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)],
                           one_way=not args.bidirectional, construction_sites=not args.interconnected,
                           traffic_lights=not args.notrafficlights)
             # env.reset()

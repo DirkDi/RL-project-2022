@@ -3,6 +3,9 @@ import gym
 import sys
 import logging
 import random
+import networkx as nx
+import matplotlib.pyplot as plt
+import pylab
 from collections import Counter
 
 # Actions
@@ -56,6 +59,7 @@ class CityEnv(gym.Env):
         self.already_driven = [self.pos]  # contains the points where the agent already was
         self.num_traffic_lights = random.randint(1, self.height)
         self.traffic_lights = []  # list of coordinates with traffic lights
+        self.dist = 0
 
         logging.debug(f'The start position is {self.init_pos}')
         if dist_matrix is None:
@@ -123,6 +127,7 @@ class CityEnv(gym.Env):
         self.timer = 0
         self.pos = self.init_pos
         self.packages = self.packages_initial.copy()
+        self.dist = 0
         return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.float32)
 
     def step(self, action):
@@ -172,9 +177,11 @@ class CityEnv(gym.Env):
                 'render.modes': ['console']}
         # reward = -(dist * traffic_flow)
         # reward = (1 / (dist * traffic_flow)) * 1000
-        reward = (self.max_distance - dist + 1) / traffic_flow
+        complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 2 * dist * traffic_flow
+        self.dist += complete_dist
+        reward = 1 / (dist * traffic_flow + self.dist / 10)
         if self.pos in self.traffic_lights:
-            reward -= 50
+            reward = reward / 2
         if (new_pos_x, new_pos_y) == self.packages[0]:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
@@ -299,3 +306,6 @@ class CityEnv(gym.Env):
                 explored.append(next_vertex)
                 queue.append(next_vertex)
         return False
+
+    def draw_map(self):
+        pass
