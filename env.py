@@ -157,36 +157,39 @@ class CityEnv(gym.Env):
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
                 reward = 1 / dist_to_next_package
             """
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), -10000 * (
-                    self.height * self.width), False, {
+            reward = 0  # -10000 * (self.height * self.width)
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
                        'render.modes': ['console']}
+        start_vertex = self.vertices_matrix[pos_x, pos_y]
+        target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
+        dist = self.dist_matrix[target_vertex, start_vertex]
+        traffic_flow = self.traffic_matrix[target_vertex, start_vertex]
+        # action is not allowed if there is no vertex between both points (value is 0 for dist & traffic_flow)
+        if not dist:
+            reward = 0  # -10000 * (self.height * self.width)
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
+                       'render.modes': ['console']}
+
         self.pos = new_pos_x, new_pos_y
+        """
         if self.pos in self.already_driven:
             self.already_driven.append(self.pos)
             # count = Counter(self.already_driven)[self.pos]
             return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -10000 * (
                     self.height * self.width), False, {'render.modes': ['console']}
-        start_vertex = self.vertices_matrix[pos_x, pos_y]
-        target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
-        dist = self.dist_matrix[target_vertex, start_vertex]
-        traffic_flow = self.traffic_matrix[target_vertex, start_vertex]
-        # action is not allowed if there is no vertex between both points (value is 0 for dist/traffic_flow)
-        if not dist:
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), -10000 * (
-                    self.height * self.width), False, {
-                'render.modes': ['console']}
-        # reward = -(dist * traffic_flow)
+        """
+        reward = -(dist * traffic_flow)
         # reward = (1 / (dist * traffic_flow)) * 1000
         complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 2 * dist * traffic_flow
         self.dist += complete_dist
-        reward = 1 / (dist * traffic_flow + self.dist / 10)
-        if self.pos in self.traffic_lights:
-            reward = reward / 2
-        if (new_pos_x, new_pos_y) == self.packages[0]:
+        # reward = 1 / (dist * traffic_flow + self.dist / 10)
+        # if self.pos in self.traffic_lights:
+        #     reward = reward / 2
+        if (new_pos_x, new_pos_y) in self.packages:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
             self.already_driven = []  # reset already driven array
-            reward += 10 * (self.height + self.width + 1)
+            # reward += 10 * (self.height + self.width + 1)
 
         packages_count = len(self.packages)
         done = packages_count == 0

@@ -119,16 +119,21 @@ class CityEnv(gym.Env):
         elif action == RIGHT and pos_y < self.width - 1:
             new_pos_y += 1
         else:
-            return np.array([pos_x, pos_y, len(self.packages)]), -1, False, {}
+            return np.array([pos_x, pos_y, len(self.packages)]), 0, False, {}
 
-        self.pos = new_pos_x, new_pos_y
-
-        # calculate reward
+        # calculate weight
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[start_vertex, target_vertex]
         traffic_flow = self.traffic_matrix[start_vertex, target_vertex]
-        reward = -(dist * traffic_flow)
+        weight = dist * traffic_flow
+
+        # There's no way from start to target vertex
+        if weight == 0:
+            return np.array([pos_x, pos_y, len(self.packages)]), 0, False, {}
+
+        self.pos = new_pos_x, new_pos_y
+        reward = -weight
 
         # count packages and remove collected ones
         if (new_pos_x, new_pos_y) in self.packages:

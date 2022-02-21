@@ -50,23 +50,23 @@ def test():
         [0, 0, 0, 0, 1, 0, 1, 0, 1],
         [0, 0, 0, 0, 0, 20, 0, 1, 0]
     ])
-    """
+
     dist_matrix = np.array([
-        [0, 66, 0, 24, 0, 0, 0, 0, 0],
-        [66, 0, 10, 0, 21, 0, 0, 0, 0],
-        [0, 10, 0, 0, 0, 84, 0, 0, 0],
-        [24, 0, 0, 0, 14, 0, 95, 0, 0],
-        [0, 21, 0, 14, 0, 98, 0, 20, 0],
-        [0, 0, 84, 0, 98, 0, 0, 0, 22],
-        [0, 0, 0, 95, 0, 0, 0, 55, 0],
-        [0, 0, 0, 0, 20, 0, 55, 0, 40],
-        [0, 0, 0, 0, 0, 22, 0, 40, 0]
+        [0, 113, 0, 92, 0, 0, 0, 0, 0],
+        [113, 0, 43, 0, 139, 0, 0, 0, 0],
+        [0, 43, 0, 0, 0, 17, 0, 0, 0],
+        [92, 0, 0, 0, 0, 0, 130, 0, 0],
+        [0, 139, 0, 0, 0, 23, 0, 0, 0],
+        [0, 0, 0, 0, 23, 0, 0, 0, 77],
+        [0, 0, 0, 130, 0, 0, 0, 123, 0],
+        [0, 0, 0, 0, 126, 0, 123, 0, 141],
+        [0, 0, 0, 0, 0, 77, 0, 141, 0]
     ])
-    """
+
     env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix)
     env.reset()
     # print(env.validate_accessibility(0, 1))
-    return 0, []
+    # return 0, []
 
     r, l, Q = sarsa(env, 25000)
 
@@ -118,7 +118,7 @@ def main():
                           traffic_lights=not args.notrafficlights)
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 1000)
+            r, l, Q = sarsa(env, 5000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         elif mode == 'random':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])

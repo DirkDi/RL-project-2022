@@ -39,6 +39,6 @@ def run_agent(env, model):
         actions.append(action)
         obs, reward, done, info = env.step(action)
         cum_r += reward
-        print(reward)
+        # print(reward)
         if done:
             return cum_r, actions
