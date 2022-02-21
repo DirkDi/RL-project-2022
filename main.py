@@ -1,7 +1,7 @@
 import torch
 import random
 import argparse
-import logging
+import baselines
 from env import CityEnv
 from sarsa import *
 from experimental.CityEnv import CityEnv as Env
@@ -27,7 +27,7 @@ def set_seeds(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.manual_seed(seed)
-    torch.use_deterministic_algorithms(True)
+    #torch.use_deterministic_algorithms(True)
 
 
 def test():
@@ -122,24 +122,30 @@ def main():
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         elif mode == 'random':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
-            cum_r, actions = random_agent(env)
+            cum_r, actions = baselines.random_agent(env)
+        elif mode == 'min_weight':
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
+            cum_r, actions = baselines.min_weight_agent(env)
+        elif mode == 'max_weight':
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
+            cum_r, actions = baselines.max_weight_agent(env)
         elif mode == 'a2c':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2)])
             check_env(env, warn=True)
-            model = a2c_agent(env, total_timesteps=10000, log_interval=1000, seed=seeds[0])
-            print("training done")
+            model = a2c_agent(env, total_timesteps=100000, log_interval=1000, seed=seed)
+            logging.info("training done")
             cum_r, actions = run_agent(env, model)
         elif mode == 'ppo1':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
             check_env(env, warn=True)
             model = ppo_agent(env)
-            print("training done")
+            logging.info("training done")
             cum_r, actions = run_agent(env, model)
         elif mode == 'dqn':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
             check_env(env, warn=True)
             model = dqn_agent(env)
-            print("training")
+            logging.info("training done")
             cum_r, actions = run_agent(env, model)
         else:
             cum_r, actions = test()
