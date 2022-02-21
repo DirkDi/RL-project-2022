@@ -21,7 +21,8 @@ class CityEnv(gym.Env):
                  dist_matrix: np.ndarray = None,
                  traffic_matrix: np.ndarray = None,
                  packages=None,
-                 num_packages: int = 2, init_random=False, one_way=True, construction_sites=True):
+                 num_packages: int = 2, init_random=False, one_way=True, construction_sites=True,
+                 traffic_lights=True):
         """
         Initialize the environment
         """
@@ -53,6 +54,8 @@ class CityEnv(gym.Env):
         self.num_one_way = random.randint(1, self.height)
         self.num_construction_sites = random.randint(1, self.height)
         self.already_driven = [self.pos]  # contains the points where the agent already was
+        self.num_traffic_lights = random.randint(1, self.height)
+        self.traffic_lights = []  # list of coordinates with traffic lights
 
         logging.debug(f'The start position is {self.init_pos}')
         if dist_matrix is None:
@@ -101,6 +104,8 @@ class CityEnv(gym.Env):
             self.generate_one_way_streets()
         if construction_sites:
             self.generate_construction_sites()
+        if traffic_lights:
+            self.generate_traffic_lights()
         logging.debug(f'Distance matrix:\n{dist_matrix}')
         logging.debug(f'Traffic matrix:\n{traffic_matrix}')
         logging.debug(f'Weighted map matrix:\n{self.weighted_map}')
@@ -147,28 +152,29 @@ class CityEnv(gym.Env):
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
                 reward = 1 / dist_to_next_package
             """
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), -5 * (
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), -10000 * (
                     self.height * self.width), False, {
                        'render.modes': ['console']}
         self.pos = new_pos_x, new_pos_y
         if self.pos in self.already_driven:
             self.already_driven.append(self.pos)
             # count = Counter(self.already_driven)[self.pos]
-            return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -5 * (
-                    self.height * self.width), False, \
-                   {'render.modes': ['console']}
+            return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -10000 * (
+                    self.height * self.width), False, {'render.modes': ['console']}
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[target_vertex, start_vertex]
         traffic_flow = self.traffic_matrix[target_vertex, start_vertex]
         # action is not allowed if there is no vertex between both points (value is 0 for dist/traffic_flow)
         if not dist:
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), -5 * (
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), -10000 * (
                     self.height * self.width), False, {
                 'render.modes': ['console']}
         # reward = -(dist * traffic_flow)
         # reward = (1 / (dist * traffic_flow)) * 1000
         reward = (self.max_distance - dist + 1) / traffic_flow
+        if self.pos in self.traffic_lights:
+            reward -= 50
         if (new_pos_x, new_pos_y) == self.packages[0]:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
@@ -198,6 +204,11 @@ class CityEnv(gym.Env):
 
     def render(self, mode="human"):
         pass
+
+    def generate_traffic_lights(self):
+        for i in range(self.num_traffic_lights):
+            self.traffic_lights.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
+        logging.debug(f'Traffic lights:\n {self.traffic_lights}, amount: {self.num_traffic_lights}')
 
     def generate_one_way_streets(self):
         used_points = []

@@ -1,4 +1,5 @@
 from stable_baselines3 import SAC, PPO, DQN, A2C
+from stable_baselines3.common.callbacks import BaseCallback
 
 
 def sac_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
@@ -22,8 +23,8 @@ def dqn_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
     return model
 
 
-def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1):
-    model = A2C("MlpPolicy", env, verbose=verbose)
+def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
+    model = A2C("MlpPolicy", env, verbose=verbose, n_steps=1000, seed=seed)
     model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('a2c_city')
     return model
@@ -38,6 +39,6 @@ def run_agent(env, model):
         actions.append(action)
         obs, reward, done, info = env.step(action)
         cum_r += reward
-        # print(action)
+        print(reward)
         if done:
             return cum_r, actions

@@ -16,8 +16,9 @@ def argsparser():
     parser.add_argument('--mode', '-m', type=str, default='normal',
                         help='choose the mode normal or experimental (experimental env)')
     parser.add_argument("--static", "-s", action="store_true", help="disables random distance generation")
-    parser.add_argument("-b", "--bidirectional", action="store_true", help="deactivates one way streets")
-    parser.add_argument("-i", "--interconnected", action="store_true", help="deactivates construction sites")
+    parser.add_argument("-o", "--bidirectional", action="store_true", help="deactivates one way streets")
+    parser.add_argument("-c", "--interconnected", action="store_true", help="deactivates construction sites")
+    parser.add_argument("-t", "--notrafficlights", action="store_true", help="deactivates traffic lights")
     args = parser.parse_args()
     return args
 
@@ -112,8 +113,9 @@ def main():
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)],
-                          one_way=not args.bidirectional, construction_sites=not args.interconnected)
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)],
+                          one_way=not args.bidirectional, construction_sites=not args.interconnected,
+                          traffic_lights=not args.notrafficlights)
             # env.reset()
             # print(env.step(1))
             r, l, Q = sarsa(env, 1000)
@@ -122,16 +124,16 @@ def main():
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
             cum_r, actions = random_agent(env)
         elif mode == 'a2c':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2), (2, 2)])
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2)])
             check_env(env, warn=True)
-            model = a2c_agent(env, total_timesteps=100000, log_interval=1000)
-            print("training")
+            model = a2c_agent(env, total_timesteps=10000, log_interval=1000, seed=seeds[0])
+            print("training done")
             cum_r, actions = run_agent(env, model)
         elif mode == 'ppo1':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
             check_env(env, warn=True)
             model = ppo_agent(env)
-            print("training")
+            print("training done")
             cum_r, actions = run_agent(env, model)
         elif mode == 'dqn':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
