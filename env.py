@@ -178,14 +178,12 @@ class CityEnv(gym.Env):
             return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -10000 * (
                     self.height * self.width), False, {'render.modes': ['console']}
         """
-        reward = -(dist * traffic_flow)
-        # reward = (1 / (dist * traffic_flow)) * 1000
         complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 2 * dist * traffic_flow
         self.dist += complete_dist
+        reward = -(dist * traffic_flow + self.dist / 100) if self.pos not in self.traffic_lights else -(dist * traffic_flow + self.dist / 100) * 1.2
+        # reward = (1 / (dist * traffic_flow)) * 1000
         # reward = 1 / (dist * traffic_flow + self.dist / 10)
-        # if self.pos in self.traffic_lights:
-        #     reward = reward / 2
-        if (new_pos_x, new_pos_y) in self.packages:
+        if (new_pos_x, new_pos_y) == self.packages[0]:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
             self.already_driven = []  # reset already driven array
