@@ -178,7 +178,7 @@ class CityEnv(gym.Env):
             return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -10000 * (
                     self.height * self.width), False, {'render.modes': ['console']}
         """
-        complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 2 * dist * traffic_flow
+        complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 1.2 * dist * traffic_flow
         self.dist += complete_dist
         reward = -(dist * traffic_flow + self.dist / 100) if self.pos not in self.traffic_lights else -(dist * traffic_flow + self.dist / 100) * 1.2
         # reward = (1 / (dist * traffic_flow)) * 1000
@@ -211,7 +211,28 @@ class CityEnv(gym.Env):
         pass
 
     def render(self, mode="human"):
-        pass
+        G = nx.DiGraph()
+        pos = dict(((i // self.height, i % self.width), (i // self.height, i % self.width)) for i in range(self.matrix_height))
+        print(pos)
+        edge_labels = []
+        for i in range(self.matrix_height):
+            vertices = np.argwhere(self.weighted_map[:, i] > 0).reshape(-1)
+            # edge_weights = np.reshape(np.where(self.weighted_map[:, i] > 0)[0], -1)
+            for vertex in vertices:
+                edge_weight = self.weighted_map[vertex, i]
+                edge_labels.append(((i, vertex), edge_weight))
+        edge_labels = dict(edge_labels)
+        print(edge_labels)
+        # pos = nx.spring_layout(G)
+        # H = nx.grid_2d_graph(self.height, self.width)
+        # pos = dict((n, n) for n in H.nodes())
+        # labels = dict(((i, j), i * self.height + j) for i, j in H.nodes())
+        # H.remove_node((0, 0))
+        # nx.draw_networkx(H, pos=pos, labels=labels)
+        # print(H.edges)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+        nx.draw(G, with_labels=True)
+        plt.show()
 
     def generate_traffic_lights(self):
         for i in range(self.num_traffic_lights):
