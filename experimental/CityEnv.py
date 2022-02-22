@@ -1,6 +1,7 @@
 import numpy as np
 import gym
-import logging
+from matplotlib import pyplot as plt
+import networkx as nx
 
 # Actions
 UP = 0
@@ -30,7 +31,7 @@ class CityEnv(gym.Env):
         self.max_traffic = max_traffic    # maximum traffic occurrence between vertices
 
         matrix_size = height * width
-        self.vertices_matrix = np.reshape(np.arange(0, matrix_size), (-1, height))
+        self.vertices_matrix = np.reshape(np.arange(0, matrix_size), (-1, width))
 
         if dist_matrix is None:
             dist_matrix = np.zeros((matrix_size, matrix_size))
@@ -149,6 +150,31 @@ class CityEnv(gym.Env):
         meta_info = {}
         return np.array([new_pos_x, new_pos_y, packages_count]), reward, done, meta_info
 
+    def render(self, mode="human"):
+        """
+        Render the environment
+        """
+        pass
+        """
+        if self.screen is None:
+            pygame.init()
+            self.screen = pygame.display.set_mode((VIEWPORT_W, VIEWPORT_H))
+            self.screen.fill((255, 255, 255))
+        font = pygame.font.SysFont(sysfont, 48)
+        pygame.draw.circle(self.screen, (0, 0, 0), (70, 70), 30, 4)
+        vertex_no = font.render("0", True, (0, 0, 0))
+        self.screen.blit(vertex_no, (60, 55))
+        pygame.draw.circle(self.screen, (0, 0, 0), (210, 70), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (350, 70), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (70, 210), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (210, 210), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (350, 210), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (70, 350), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (210, 350), 30)
+        pygame.draw.circle(self.screen, (0, 0, 0), (350, 350), 30)
+        pygame.display.update()
+        """
+
     def close(self):
         """
         Make sure environment is closed
@@ -171,3 +197,19 @@ class CityEnv(gym.Env):
                 explored.append(next_vertex)
                 queue.append(next_vertex)
         return False
+
+    def draw_map(self):
+        G = nx.DiGraph()
+        vertices = self.vertices_matrix.reshape(-1).tolist()
+        for vertex in vertices:
+            for next_vertex in np.argwhere(self.dist_matrix[vertex] > 0).reshape(-1):
+                weight = self.dist_matrix[vertex, next_vertex] * self.traffic_matrix[vertex, next_vertex]
+                G.add_edge(vertex, next_vertex, weight=weight)
+        pos = {v: pos for v, pos in zip(vertices, [
+            (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)
+        ])}
+        # print(pos.items())
+        labels = nx.get_edge_attributes(G, "weight")
+        nx.draw_networkx(G, pos)
+        nx.draw_networkx_edge_labels(G, pos, labels)
+        plt.show()

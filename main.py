@@ -63,10 +63,11 @@ def test():
         [0, 0, 0, 0, 0, 77, 0, 141, 0]
     ])
 
-    env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix)
+    env = Env(height=3, width=2, packages=[(0, 2), (2, 2)])
     env.reset()
-    # print(env.validate_accessibility(0, 1))
-    # return 0, []
+    env.draw_map()
+    env.close()
+    return 0, []
 
     r, l, Q = sarsa(env, 25000)
 
@@ -113,10 +114,11 @@ def main():
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (9, 6)],
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (2, 0)],
                           one_way=not args.bidirectional, construction_sites=not args.interconnected,
                           traffic_lights=not args.notrafficlights)
-            env.render()
+            # print(env.vertices_matrix[2, 2], env.vertices_matrix[2, 0])
+            env.draw_map()
             return
             # env.reset()
             # print(env.step(1))

@@ -47,43 +47,39 @@ class CityEnv(gym.Env):
         self.max_distance = max_distance  # maximum distance between vertices
         self.min_traffic = min_traffic  # minimum traffic occurrence between vertices
         self.max_traffic = max_traffic  # maximum traffic occurrence between vertices
-        self.matrix_height = self.height * self.width
-        self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
-        self.pos = self.init_pos
-        self.prev_pos = self.init_pos
-        self.vertices_matrix = np.reshape(np.arange(0, self.matrix_height), (-1, self.height))
-        self.timer = 0
-        self.num_packages = num_packages
-        self.num_one_way = random.randint(1, self.height)
-        self.num_construction_sites = random.randint(1, self.height)
-        self.already_driven = [self.pos]  # contains the points where the agent already was
-        self.num_traffic_lights = random.randint(1, self.height)
-        self.traffic_lights = []  # list of coordinates with traffic lights
-        self.dist = 0
 
-        logging.debug(f'The start position is {self.init_pos}')
+        # Create vertices matrix
+        self.matrix_height = self.height * self.width
+        self.vertices_matrix = np.reshape(np.arange(0, self.matrix_height), (-1, self.width))
+
         if dist_matrix is None:
             dist_matrix = np.zeros((self.matrix_height, self.matrix_height))
-            for i in range(self.matrix_height):
-                for j in range(self.matrix_height):
-                    if dist_matrix[j][i] != 0:
-                        pass
-                    elif j == i + self.height or (j == i + 1 and j % self.height != 0):
-                        rand_val = random.randint(min_distance, max_distance)
-                        dist_matrix[j, i] = rand_val if init_random else 1
-                        dist_matrix[i, j] = rand_val if init_random else 1
+            for i in range(self.height):
+                for j in range(self.width):
+                    start_vertex = self.vertices_matrix[i, j]
+                    for a, b in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
+                        if 0 <= a < self.height and 0 <= b < self.width:
+                            target_vertex = self.vertices_matrix[a, b]
+                            if dist_matrix[start_vertex, target_vertex] > 0:
+                                continue
+                            rand_val = random.randint(min_distance, max_distance)
+                            dist_matrix[start_vertex, target_vertex] = rand_val if init_random else 1
+                            dist_matrix[target_vertex, start_vertex] = rand_val if init_random else 1
 
         # create values for traffic
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_height, self.matrix_height))
-            for i in range(self.matrix_height):
-                for j in range(self.matrix_height):
-                    if traffic_matrix[j][i] != 0:
-                        pass
-                    elif j == i + self.height or (j == i + 1 and j % self.height != 0):
-                        rand_val = round(random.uniform(min_traffic, max_traffic), 2)
-                        traffic_matrix[j, i] = rand_val if init_random else 1
-                        traffic_matrix[i, j] = rand_val if init_random else 1
+            for i in range(self.height):
+                for j in range(self.width):
+                    start_vertex = self.vertices_matrix[i, j]
+                    for a, b in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
+                        if 0 <= a < self.height and 0 <= b < self.width:
+                            target_vertex = self.vertices_matrix[a, b]
+                            if traffic_matrix[start_vertex, target_vertex] > 0:
+                                continue
+                            rand_val = round(random.uniform(min_traffic, max_traffic), 2)
+                            traffic_matrix[start_vertex, target_vertex] = rand_val if init_random else 1
+                            traffic_matrix[target_vertex, start_vertex] = rand_val if init_random else 1
 
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
@@ -92,6 +88,20 @@ class CityEnv(gym.Env):
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
                 assert self.validate_accessibility(i, j), "The city graph is not connected!"
+
+        self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
+        self.pos = self.init_pos
+        self.prev_pos = self.init_pos
+        logging.debug(f'The start position is {self.init_pos}')
+
+        self.timer = 0
+        self.num_packages = num_packages
+        self.num_one_way = random.randint(1, self.height)
+        self.num_construction_sites = random.randint(1, self.height)
+        self.already_driven = [self.pos]  # contains the points where the agent already was
+        self.num_traffic_lights = random.randint(1, self.height)
+        self.traffic_lights = []  # list of coordinates with traffic lights
+        self.dist = 0
 
         if packages is None:
             packages = []
@@ -211,28 +221,10 @@ class CityEnv(gym.Env):
         pass
 
     def render(self, mode="human"):
-        G = nx.DiGraph()
-        pos = dict(((i // self.height, i % self.width), (i // self.height, i % self.width)) for i in range(self.matrix_height))
-        print(pos)
-        edge_labels = []
-        for i in range(self.matrix_height):
-            vertices = np.argwhere(self.weighted_map[:, i] > 0).reshape(-1)
-            # edge_weights = np.reshape(np.where(self.weighted_map[:, i] > 0)[0], -1)
-            for vertex in vertices:
-                edge_weight = self.weighted_map[vertex, i]
-                edge_labels.append(((i, vertex), edge_weight))
-        edge_labels = dict(edge_labels)
-        print(edge_labels)
-        # pos = nx.spring_layout(G)
-        # H = nx.grid_2d_graph(self.height, self.width)
-        # pos = dict((n, n) for n in H.nodes())
-        # labels = dict(((i, j), i * self.height + j) for i, j in H.nodes())
-        # H.remove_node((0, 0))
-        # nx.draw_networkx(H, pos=pos, labels=labels)
-        # print(H.edges)
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-        nx.draw(G, with_labels=True)
-        plt.show()
+        """
+        Render the environment
+        """
+        pass
 
     def generate_traffic_lights(self):
         for i in range(self.num_traffic_lights):
@@ -330,4 +322,16 @@ class CityEnv(gym.Env):
         return False
 
     def draw_map(self):
-        pass
+        G = nx.DiGraph()
+        vertices = self.vertices_matrix.reshape(-1).tolist()
+        for vertex in vertices:
+            for next_vertex in np.argwhere(self.weighted_map[:, vertex] > 0).reshape(-1):
+                weight = self.weighted_map[next_vertex, vertex]
+                G.add_edge(vertex, next_vertex, weight=weight)
+        pos = {v: pos for v, pos in zip(vertices, [
+            (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)
+        ])}
+        labels = nx.get_edge_attributes(G, "weight")
+        nx.draw_networkx(G, pos)
+        nx.draw_networkx_edge_labels(G, pos, labels)
+        plt.show()
