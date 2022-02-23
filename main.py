@@ -109,16 +109,18 @@ def main():
     if mode not in ['normal', 'experimental', 'random', 'a2c', 'ppo1', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
-    seeds = [4321]  # list of seeds for experiments
+    seeds = [6564]  # list of seeds for experiments
     for seed in seeds:
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=10, width=10, packages=[(2, 2), (2, 0)],
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (2, 0)],
                           one_way=not args.bidirectional, construction_sites=not args.interconnected,
                           traffic_lights=not args.notrafficlights)
             # print(env.vertices_matrix[2, 2], env.vertices_matrix[2, 0])
+            logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
             env.draw_map()
+            logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
             return
             # env.reset()
             # print(env.step(1))
@@ -134,7 +136,7 @@ def main():
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
             cum_r, actions = baselines.max_weight_agent(env)
         elif mode == 'a2c':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(0, 2)])
+            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(0, 2), (2, 2)])
             check_env(env, warn=True)
             model = a2c_agent(env, total_timesteps=100000, log_interval=1000, seed=seed)
             logging.info("training done")

@@ -5,6 +5,7 @@ import logging
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
+import time
 import pylab
 from collections import Counter
 
@@ -65,7 +66,7 @@ class CityEnv(gym.Env):
                             rand_val = random.randint(min_distance, max_distance)
                             dist_matrix[start_vertex, target_vertex] = rand_val if init_random else 1
                             dist_matrix[target_vertex, start_vertex] = rand_val if init_random else 1
-
+        print("dist_matrix created")
         # create values for traffic
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_height, self.matrix_height))
@@ -80,10 +81,9 @@ class CityEnv(gym.Env):
                             rand_val = round(random.uniform(min_traffic, max_traffic), 2)
                             traffic_matrix[start_vertex, target_vertex] = rand_val if init_random else 1
                             traffic_matrix[target_vertex, start_vertex] = rand_val if init_random else 1
-
+        print("traffic_matrix created")
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
-
         # Check if city graph is connected
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
@@ -96,10 +96,16 @@ class CityEnv(gym.Env):
 
         self.timer = 0
         self.num_packages = num_packages
-        self.num_one_way = random.randint(1, self.height)
-        self.num_construction_sites = random.randint(1, self.height)
+        minimal_generating = min(self.height - 1, self.width - 1)
+        if minimal_generating:
+            self.num_one_way = random.randint(1, min(self.height - 1, self.width - 1))
+            self.num_construction_sites = random.randint(1, min(self.height - 1, self.width - 1))
+            self.num_traffic_lights = random.randint(1, min(self.height - 1, self.width - 1))
+        else:
+            self.num_one_way = 0
+            self.num_construction_sites = 0
+            self.num_traffic_lights = 0
         self.already_driven = [self.pos]  # contains the points where the agent already was
-        self.num_traffic_lights = random.randint(1, self.height)
         self.traffic_lights = []  # list of coordinates with traffic lights
         self.dist = 0
 
@@ -114,10 +120,13 @@ class CityEnv(gym.Env):
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
         self.weighted_map = self.get_map()
+        print("weighted_map created")
         if one_way:
             self.generate_one_way_streets()
+        print("one way streets created")
         if construction_sites:
             self.generate_construction_sites()
+        print("construction sites created")
         if traffic_lights:
             self.generate_traffic_lights()
         logging.debug(f'Distance matrix:\n{dist_matrix}')
@@ -169,7 +178,7 @@ class CityEnv(gym.Env):
             """
             reward = 0  # -10000 * (self.height * self.width)
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
-                       'render.modes': ['console']}
+                'render.modes': ['console']}
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[target_vertex, start_vertex]
@@ -178,7 +187,7 @@ class CityEnv(gym.Env):
         if not dist:
             reward = 0  # -10000 * (self.height * self.width)
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
-                       'render.modes': ['console']}
+                'render.modes': ['console']}
 
         self.pos = new_pos_x, new_pos_y
         """
@@ -190,7 +199,8 @@ class CityEnv(gym.Env):
         """
         complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 1.2 * dist * traffic_flow
         self.dist += complete_dist
-        reward = -(dist * traffic_flow + self.dist / 100) if self.pos not in self.traffic_lights else -(dist * traffic_flow + self.dist / 100) * 1.2
+        reward = -(dist * traffic_flow + self.dist / 100) if self.pos not in self.traffic_lights else -(
+                    dist * traffic_flow + self.dist / 100) * 1.2
         # reward = (1 / (dist * traffic_flow)) * 1000
         # reward = 1 / (dist * traffic_flow + self.dist / 10)
         if (new_pos_x, new_pos_y) == self.packages[0]:
@@ -227,6 +237,7 @@ class CityEnv(gym.Env):
         pass
 
     def generate_traffic_lights(self):
+        print(self.num_traffic_lights)
         for i in range(self.num_traffic_lights):
             self.traffic_lights.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
         logging.debug(f'Traffic lights:\n {self.traffic_lights}, amount: {self.num_traffic_lights}')
@@ -262,11 +273,13 @@ class CityEnv(gym.Env):
 
     def generate_construction_sites(self):
         used_points = []
+        amount_points = self.height * self.width
         for i in range(self.num_construction_sites):
             taken_points = True
             start_vertex, target_vertex = -1, -1
             no_path = True
-            while no_path:
+            counter = 0
+            while no_path and counter <= amount_points:
                 while taken_points:
                     start_vertex = self.vertices_matrix[
                         random.randint(0, self.height - 1), random.randint(0, self.width - 1)]
@@ -292,6 +305,7 @@ class CityEnv(gym.Env):
                     self.dist_matrix[target_vertex, start_vertex] = old_dist
                     self.traffic_matrix[target_vertex, start_vertex] = old_traffic
                     self.weighted_map[target_vertex, start_vertex] = old_weight
+                counter += 1
 
             used_points += [start_vertex, target_vertex]
         logging.debug(f'Construction sites:\n {used_points}, amount: {self.num_construction_sites}')
@@ -332,6 +346,7 @@ class CityEnv(gym.Env):
         pos = {v: pos for v, pos in zip(vertices, [
             (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)
         ])}
+        # TODO: check colors
         start_node = self.vertices_matrix[self.init_pos]
         package_nodes = [self.vertices_matrix[package] for package in self.packages_initial]
         traffic_nodes = [self.vertices_matrix[light] for light in self.traffic_lights]
@@ -344,6 +359,8 @@ class CityEnv(gym.Env):
                 color_map.append('yellow')
             else:
                 color_map.append('blue')
+        color_map = ['blue', 'yellow', 'yellow', 'blue', 'blue', 'blue', 'red', 'green', 'blue']
+
         labels = nx.get_edge_attributes(g, "weight")
         nx.draw_networkx(g, pos, node_color=color_map)
         nx.draw_networkx_edge_labels(g, pos, labels)
