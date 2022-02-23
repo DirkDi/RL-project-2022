@@ -301,7 +301,7 @@ class CityEnv(gym.Env):
         map_matrix = np.zeros((nodes, nodes))
         for i in range(nodes):
             for j in range(nodes):
-                map_matrix[i, j] = self.dist_matrix[i, j] * self.traffic_matrix[i, j]
+                map_matrix[i, j] = round(self.dist_matrix[i, j] * self.traffic_matrix[i, j], 2)
         return map_matrix
 
     def validate_accessibility(self, start_vertex, target_vertex):
@@ -322,16 +322,29 @@ class CityEnv(gym.Env):
         return False
 
     def draw_map(self):
-        G = nx.DiGraph()
+        g = nx.DiGraph()
         vertices = self.vertices_matrix.reshape(-1).tolist()
+        color_map = []
         for vertex in vertices:
             for next_vertex in np.argwhere(self.weighted_map[:, vertex] > 0).reshape(-1):
                 weight = self.weighted_map[next_vertex, vertex]
-                G.add_edge(vertex, next_vertex, weight=weight)
+                g.add_edge(vertex, next_vertex, weight=weight)
         pos = {v: pos for v, pos in zip(vertices, [
             (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)
         ])}
-        labels = nx.get_edge_attributes(G, "weight")
-        nx.draw_networkx(G, pos)
-        nx.draw_networkx_edge_labels(G, pos, labels)
+        start_node = self.vertices_matrix[self.init_pos]
+        package_nodes = [self.vertices_matrix[package] for package in self.packages_initial]
+        traffic_nodes = [self.vertices_matrix[light] for light in self.traffic_lights]
+        for i, node in enumerate(pos.values()):
+            if i == start_node:
+                color_map.append('green')
+            elif i in package_nodes:
+                color_map.append('red')
+            elif i in traffic_nodes:
+                color_map.append('yellow')
+            else:
+                color_map.append('blue')
+        labels = nx.get_edge_attributes(g, "weight")
+        nx.draw_networkx(g, pos, node_color=color_map)
+        nx.draw_networkx_edge_labels(g, pos, labels)
         plt.show()
