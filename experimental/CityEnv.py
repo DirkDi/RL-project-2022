@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import gym
 from matplotlib import pyplot as plt
@@ -19,6 +20,7 @@ class CityEnv(gym.Env):
                  min_traffic=1, max_traffic=2,
                  dist_matrix=None, traffic_matrix=None,
                  packages=None, num_packages=1,
+                 traffic_lights=None, num_traffic_lights=0,
                  init_random=False):
         """
         Initialize the environment
@@ -68,6 +70,11 @@ class CityEnv(gym.Env):
 
         self.packages = []
         self.packages_initial = packages
+
+        if traffic_lights is None:
+            traffic_lights = [(1, 1)]
+        self.traffic_lights = traffic_lights
+
         self.pos = 0, 0
         self.timer = 0
 
@@ -199,17 +206,21 @@ class CityEnv(gym.Env):
         return False
 
     def draw_map(self):
-        G = nx.DiGraph()
-        vertices = self.vertices_matrix.reshape(-1).tolist()
-        for vertex in vertices:
-            for next_vertex in np.argwhere(self.dist_matrix[vertex] > 0).reshape(-1):
-                weight = self.dist_matrix[vertex, next_vertex] * self.traffic_matrix[vertex, next_vertex]
-                G.add_edge(vertex, next_vertex, weight=weight)
-        pos = {v: pos for v, pos in zip(vertices, [
+        g = nx.DiGraph()
+        pos = {}
+        for v, p in zip(self.vertices_matrix.reshape(-1).tolist(), [
             (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)
-        ])}
-        # print(pos.items())
-        labels = nx.get_edge_attributes(G, "weight")
-        nx.draw_networkx(G, pos)
-        nx.draw_networkx_edge_labels(G, pos, labels)
+        ]):
+            pos[v] = p
+            for next_v in np.argwhere(self.dist_matrix[v] > 0).reshape(-1):
+                weight = self.dist_matrix[v, next_v] * self.traffic_matrix[v, next_v]
+                g.add_edge(v, next_v, weight=weight)
+        traffic_lights = [self.vertices_matrix[light] for light in self.traffic_lights]
+        packages = [self.vertices_matrix[package] for package in self.packages]
+        nx.draw_networkx(g, pos)
+        nx.draw_networkx_nodes(g, pos, nodelist=traffic_lights, node_color="yellow")
+        nx.draw_networkx_nodes(g, pos, nodelist=packages, node_color="red")
+        nx.draw_networkx_nodes(g, pos, nodelist=[self.vertices_matrix[self.pos]], node_color="green")
+        labels = nx.get_edge_attributes(g, "weight")
+        nx.draw_networkx_edge_labels(g, pos, labels)
         plt.show()

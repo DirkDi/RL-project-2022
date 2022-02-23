@@ -63,8 +63,9 @@ def test():
         [0, 0, 0, 0, 0, 77, 0, 141, 0]
     ])
 
-    env = Env(height=3, width=2, packages=[(0, 2), (2, 2)])
+    env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix, traffic_lights=[(1, 0), (0, 1)])
     env.reset()
+    # print(env.packages)
     env.draw_map()
     env.close()
     return 0, []
