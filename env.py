@@ -149,7 +149,6 @@ class CityEnv(gym.Env):
         """
         self.timer = 0
         self.pos = self.init_pos
-        print(self.init_pos)
         self.packages = self.packages_initial.copy()
         self.dist = 0
         return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.float32)
@@ -231,7 +230,6 @@ class CityEnv(gym.Env):
         pass
 
     def generate_traffic_lights(self):
-        print(self.num_traffic_lights)
         for i in range(self.num_traffic_lights):
             self.traffic_lights.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
         logging.debug(f'Traffic lights:\n {self.traffic_lights}, amount: {self.num_traffic_lights}')
@@ -355,7 +353,6 @@ class CityEnv(gym.Env):
         action, min_weight = -1, float('inf')
         for i, weight in enumerate(self.weighted_map[:, position]):
             dest_pos = np.where(self.vertices_matrix == i)
-            print(dest_pos)
             actual_weight = weight * 1.2 if dest_pos in self.traffic_lights else weight
             # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
             if actual_weight and min_weight > actual_weight and dest_pos not in self.already_driven:
