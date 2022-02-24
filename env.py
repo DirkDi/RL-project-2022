@@ -382,7 +382,7 @@ class CityEnv(gym.Env):
             dest_pos = np.where(self.vertices_matrix == i)
             actual_weight = weight * 1.2 if dest_pos in self.traffic_lights else weight
             # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
-            if max_weight < actual_weight and dest_pos not in self.already_driven:
+            if actual_weight and max_weight < actual_weight and dest_pos not in self.already_driven:
                 dest_pos = np.where(self.vertices_matrix == i)
                 diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
                 if diff_x == 1:
