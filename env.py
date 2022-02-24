@@ -370,7 +370,6 @@ class CityEnv(gym.Env):
                     action = RIGHT
                 min_weight = actual_weight
         # check if action is -1 (happens when all neighbour nodes are already driven), here random should be used
-
         if action == -1:
             action = self.action_space.sample()
         return action
@@ -385,7 +384,7 @@ class CityEnv(gym.Env):
             # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
             if max_weight < actual_weight and dest_pos not in self.already_driven:
                 dest_pos = np.where(self.vertices_matrix == i)
-                diff_x, diff_y = pos_x - dest_pos[0], pos_y - dest_pos[1]
+                diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
                 if diff_x == 1:
                     action = DOWN
                 elif diff_x == -1:
