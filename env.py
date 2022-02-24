@@ -89,23 +89,17 @@ class CityEnv(gym.Env):
             for j in range(self.matrix_height):
                 assert self.validate_accessibility(i, j), "The city graph is not connected!"
 
-        self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
-        self.pos = self.init_pos
-        self.prev_pos = self.init_pos
-        logging.debug(f'The start position is {self.init_pos}')
-
         self.timer = 0
         self.num_packages = num_packages
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
             self.num_one_way = random.randint(1, min(self.height - 1, self.width - 1))
             self.num_construction_sites = random.randint(1, min(self.height - 1, self.width - 1))
-            self.num_traffic_lights = random.randint(1, min(self.height - 1, self.width - 1))
+            self.num_traffic_lights = random.randint(1, self.width * self.height // 2)
         else:
             self.num_one_way = 0
             self.num_construction_sites = 0
             self.num_traffic_lights = 0
-        self.already_driven = [self.pos]  # contains the points where the agent already was
         self.traffic_lights = []  # list of coordinates with traffic lights
         self.dist = 0
 
@@ -116,9 +110,18 @@ class CityEnv(gym.Env):
                     packages.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
             else:
                 packages.append((2, 1))
-        logging.debug(f'Coordinates of packages are: {packages}')
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
+        logging.debug(f'Coordinates of packages are: {packages}')
+
+        while True:
+            self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
+            if self.init_pos not in self.packages:
+                self.pos = self.init_pos
+                self.prev_pos = self.init_pos
+                break
+        logging.debug(f'The start position is {self.init_pos}')
+
         self.weighted_map = self.get_map()
         print("weighted_map created")
         if one_way:
@@ -137,6 +140,7 @@ class CityEnv(gym.Env):
         self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.float32)
         self.action_space = gym.spaces.Discrete(4)
         self.reward_range = [0, 0]  # TODO: define reward range
+        self.already_driven = [self.pos]  # contains the points where the agent already was
         self.already_driven = [(0, 0)]
 
     def reset(self):
@@ -199,27 +203,16 @@ class CityEnv(gym.Env):
         """
         complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 1.2 * dist * traffic_flow
         self.dist += complete_dist
-        reward = -(dist * traffic_flow + self.dist / 100) if self.pos not in self.traffic_lights else -(
-                    dist * traffic_flow + self.dist / 100) * 1.2
-        # reward = (1 / (dist * traffic_flow)) * 1000
-        # reward = 1 / (dist * traffic_flow + self.dist / 10)
+        reward = -(dist * traffic_flow) if self.pos not in self.traffic_lights else -(
+                    dist * traffic_flow) * 1.2
         if (new_pos_x, new_pos_y) in self.packages:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
             self.already_driven = []  # reset already driven array
-            # reward += 10 * (self.height + self.width + 1)
 
         packages_count = len(self.packages)
         done = packages_count == 0
-        """
-        if done:
-            reward = 2
-        else:
-            dist_to_next_package = self.height * self.width
-            for pack_x, pack_y in self.packages:
-                dist_to_next_package = min(dist_to_next_package, abs(pack_x - new_pos_x) + abs(pack_y - new_pos_y))
-            reward = 50 * (1 / (dist * traffic_flow + 10 * dist_to_next_package))
-        """
+
         meta_info = {'render.modes': ['console']}
         self.already_driven.append((new_pos_x, new_pos_y))
         return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.float32), reward, done, meta_info

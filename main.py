@@ -115,17 +115,16 @@ def main():
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (2, 0)],
+            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(2, 2), (2, 0), (4, 2), (0, 3)],
                           one_way=not args.bidirectional, construction_sites=not args.interconnected,
                           traffic_lights=not args.notrafficlights)
             # print(env.vertices_matrix[2, 2], env.vertices_matrix[2, 0])
             logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
             env.draw_map()
             logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
-            return
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 5000)
+            r, l, Q = sarsa(env, 100000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         elif mode == 'random':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
