@@ -149,6 +149,7 @@ class CityEnv(gym.Env):
         """
         self.timer = 0
         self.pos = self.init_pos
+        print(self.init_pos)
         self.packages = self.packages_initial.copy()
         self.dist = 0
         return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.float32)
@@ -204,7 +205,7 @@ class CityEnv(gym.Env):
         complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 1.2 * dist * traffic_flow
         self.dist += complete_dist
         reward = -(dist * traffic_flow) if self.pos not in self.traffic_lights else -(
-                    dist * traffic_flow) * 1.2
+                dist * traffic_flow) * 1.2
         if (new_pos_x, new_pos_y) in self.packages:
             while (new_pos_x, new_pos_y) in self.packages:
                 self.packages.remove((new_pos_x, new_pos_y))
@@ -347,3 +348,54 @@ class CityEnv(gym.Env):
         labels = nx.get_edge_attributes(g, "weight")
         nx.draw_networkx_edge_labels(g, pos, labels)
         plt.show()
+
+    def get_min_emission_action(self):
+        pos_x, pos_y = self.pos
+        position = self.vertices_matrix[pos_x, pos_y]
+        action, min_weight = -1, float('inf')
+        for i, weight in enumerate(self.weighted_map[:, position]):
+            dest_pos = np.where(self.vertices_matrix == i)
+            print(dest_pos)
+            actual_weight = weight * 1.2 if dest_pos in self.traffic_lights else weight
+            # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
+            if actual_weight and min_weight > actual_weight and dest_pos not in self.already_driven:
+                diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
+                if diff_x == 1:
+                    action = DOWN
+                elif diff_x == -1:
+                    action = UP
+                elif diff_y == 1:
+                    action = LEFT
+                else:
+                    action = RIGHT
+                min_weight = actual_weight
+        # check if action is -1 (happens when all neighbour nodes are already driven), here random should be used
+
+        if action == -1:
+            action = self.action_space.sample()
+        return action
+
+    def get_max_emission_action(self):
+        pos_x, pos_y = self.pos
+        position = self.vertices_matrix[pos_x, pos_y]
+        action, max_weight = -1, float('-inf')
+        for i, weight in enumerate(self.weighted_map[:, position]):
+            dest_pos = np.where(self.vertices_matrix == i)
+            actual_weight = weight * 1.2 if dest_pos in self.traffic_lights else weight
+            # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
+            if max_weight < actual_weight and dest_pos not in self.already_driven:
+                dest_pos = np.where(self.vertices_matrix == i)
+                diff_x, diff_y = pos_x - dest_pos[0], pos_y - dest_pos[1]
+                if diff_x == 1:
+                    action = DOWN
+                elif diff_x == -1:
+                    action = UP
+                elif diff_y == 1:
+                    action = LEFT
+                else:
+                    action = RIGHT
+                max_weight = actual_weight
+        # check if action is -1 (happens when all neighbour nodes are already driven), here random should be used
+        if action == -1:
+            action = self.action_space.sample()
+        return action

@@ -107,7 +107,7 @@ def main():
     logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
     # check which method should be used
     mode = args.mode.lower()
-    if mode not in ['normal', 'experimental', 'random', 'a2c', 'ppo1', 'dqn']:
+    if mode not in ['normal', 'experimental', 'random', 'min_weight', 'max_weight', 'a2c', 'ppo1', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
     seeds = [6564]  # list of seeds for experiments
@@ -131,9 +131,11 @@ def main():
             cum_r, actions = baselines.random_agent(env)
         elif mode == 'min_weight':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
+            env.draw_map()
             cum_r, actions = baselines.min_weight_agent(env)
         elif mode == 'max_weight':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
+            env.draw_map()
             cum_r, actions = baselines.max_weight_agent(env)
         elif mode == 'a2c':
             env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(0, 2), (2, 2)])
