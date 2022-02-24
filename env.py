@@ -361,9 +361,9 @@ class CityEnv(gym.Env):
             if actual_weight and min_weight > actual_weight and dest_pos not in self.already_driven:
                 diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
                 if diff_x == 1:
-                    action = DOWN
-                elif diff_x == -1:
                     action = UP
+                elif diff_x == -1:
+                    action = DOWN
                 elif diff_y == 1:
                     action = LEFT
                 else:
@@ -386,9 +386,9 @@ class CityEnv(gym.Env):
                 dest_pos = np.where(self.vertices_matrix == i)
                 diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
                 if diff_x == 1:
-                    action = DOWN
-                elif diff_x == -1:
                     action = UP
+                elif diff_x == -1:
+                    action = DOWN
                 elif diff_y == 1:
                     action = LEFT
                 else:
