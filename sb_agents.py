@@ -24,7 +24,7 @@ def dqn_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
 
 
 def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
-    model = A2C("MlpPolicy", env, verbose=verbose, n_steps=10000, seed=seed)
+    model = A2C("MlpPolicy", env, verbose=verbose, n_steps=10000000, seed=seed)
     model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('a2c_city')
     return model

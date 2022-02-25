@@ -83,6 +83,8 @@ def evaluate_sarsa_policy(q, env):
         r_acc += reward
         state = new_state
         k += 1
+        if k >= 1000:
+            break
     return r_acc, actions
 
 
@@ -114,3 +116,20 @@ def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> Def
             pbar.update(1)
     print("Q table loaded")
     return q
+
+
+def hyper_parameter_grid_search(env: gym.Env):
+    best_r = float("-inf")
+    best_q = None
+    for alpha in np.round(np.arange(0.1, 1, 0.1), 1):
+        for gamma in np.round(np.arange(0.1, 1, 0.1), 1):
+            for epsilon in np.round(np.arange(0.1, 1, 0.1), 1):
+                r, l, q = sarsa(env, num_episodes=1000, alpha=alpha, gamma=gamma, epsilon=epsilon)
+                cum_r, actions = evaluate_sarsa_policy(q, env)
+                if cum_r > best_r:
+                    best_r = cum_r
+                    print(alpha, gamma, epsilon)
+                    print(cum_r)
+                    if len(actions) <= 50:
+                        print(actions)
+    return

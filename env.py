@@ -303,6 +303,7 @@ class CityEnv(gym.Env):
         logging.debug(f'Construction sites:\n {used_points}, amount: {self.num_construction_sites}')
 
     def get_map(self):
+        return np.round(self.dist_matrix * self.traffic_matrix, 2)
         nodes = self.height * self.width
         map_matrix = np.zeros((nodes, nodes))
         for i in range(nodes):

@@ -65,8 +65,9 @@ def test():
 
     env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix, traffic_lights=[(1, 0), (0, 1)])
     env.reset()
+    hyper_parameter_grid_search(env)
     # print(env.packages)
-    env.draw_map()
+    # env.draw_map()
     env.close()
     return 0, []
 
@@ -115,7 +116,7 @@ def main():
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
         if mode == 'normal':
-            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(2, 2), (2, 0), (4, 2), (0, 3)],
+            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(2, 2), (2, 0)],  #, (4, 2), (0, 3)],
                           one_way=not args.bidirectional, construction_sites=not args.interconnected,
                           traffic_lights=not args.notrafficlights)
             # print(env.vertices_matrix[2, 2], env.vertices_matrix[2, 0])
@@ -156,7 +157,12 @@ def main():
             logging.info("training done")
             cum_r, actions = run_agent(env, model)
         else:
-            cum_r, actions = test()
+            # cum_r, actions = test()
+            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(2, 2), (2, 0)],
+                          one_way=not args.bidirectional, construction_sites=not args.interconnected,
+                          traffic_lights=not args.notrafficlights)
+            hyper_parameter_grid_search(env)
+            cum_r, actions = 0, []
         logging.info(f'The cummulative reward is {cum_r}')
         logging.info(f'The optimal action sequence is {actions}')
 
