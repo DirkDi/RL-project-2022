@@ -121,10 +121,10 @@ def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> Def
 def hyper_parameter_grid_search(env: gym.Env):
     best_r = float("-inf")
     best_q = None
-    for alpha in np.round(np.arange(0.1, 1, 0.1), 1):
-        for gamma in np.round(np.arange(0.1, 1, 0.1), 1):
-            for epsilon in np.round(np.arange(0.1, 1, 0.1), 1):
-                r, l, q = sarsa(env, num_episodes=1000, alpha=alpha, gamma=gamma, epsilon=epsilon)
+    for alpha in np.round(np.arange(0.1, 1, 0.2), 1):
+        for gamma in np.round(np.arange(0.1, 1, 0.2), 1):
+            for epsilon in np.round(np.arange(0.1, 1, 0.2), 1):
+                r, l, q = sarsa(env, num_episodes=2000, alpha=alpha, gamma=gamma, epsilon=epsilon)
                 cum_r, actions = evaluate_sarsa_policy(q, env)
                 if cum_r > best_r:
                     best_r = cum_r

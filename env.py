@@ -180,7 +180,7 @@ class CityEnv(gym.Env):
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
                 reward = 1 / dist_to_next_package
             """
-            reward = 0  # -10000 * (self.height * self.width)
+            reward = -1000  # -10000 * (self.height * self.width)
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
                 'render.modes': ['console']}
         start_vertex = self.vertices_matrix[pos_x, pos_y]
@@ -189,7 +189,7 @@ class CityEnv(gym.Env):
         traffic_flow = self.traffic_matrix[target_vertex, start_vertex]
         # action is not allowed if there is no vertex between both points (value is 0 for dist & traffic_flow)
         if not dist:
-            reward = 0  # -10000 * (self.height * self.width)
+            reward = -1000  # -10000 * (self.height * self.width)
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
                 'render.modes': ['console']}
 
