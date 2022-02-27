@@ -138,10 +138,9 @@ class CityEnv(gym.Env):
         low = np.array([0, 0, 0])
         high = np.array([self.height, self.width, num_packages])
         self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.float32)
-        self.action_space = gym.spaces.Discrete(4)
-        self.reward_range = [0, 0]  # TODO: define reward range
+        self.action_space = gym.spaces.Discrete(4)  # up, down, left, right
+        self.reward_range = [float("-inf"), 0]  # steps are negative rewards so the best possible reward is 0
         self.already_driven = [self.pos]  # contains the points where the agent already was
-        self.already_driven = [(0, 0)]
 
     def reset(self):
         """

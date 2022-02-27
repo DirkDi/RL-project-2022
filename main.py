@@ -111,7 +111,7 @@ def main():
     if mode not in ['normal', 'experimental', 'random', 'min_weight', 'max_weight', 'a2c', 'ppo1', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
-    seeds = [3333]  # list of seeds for experiments
+    seeds = [1111]  # list of seeds for experiments
     for seed in seeds:
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
@@ -139,9 +139,10 @@ def main():
             env.draw_map()
             cum_r, actions = baselines.max_weight_agent(env)
         elif mode == 'a2c':
-            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(0, 2), (2, 2)])
+            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 0), (2, 2)])
+            env.draw_map()
             check_env(env, warn=True)
-            model = a2c_agent(env, total_timesteps=100000, log_interval=1000, seed=seed)
+            model = a2c_agent(env, total_timesteps=1000000, log_interval=100, seed=seed)
             logging.info("training done")
             cum_r, actions = run_agent(env, model)
         elif mode == 'ppo1':
