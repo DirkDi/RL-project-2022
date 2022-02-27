@@ -111,7 +111,7 @@ def main():
     if mode not in ['normal', 'experimental', 'random', 'min_weight', 'max_weight', 'a2c', 'ppo1', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
-    seeds = [2222]  # list of seeds for experiments
+    seeds = [3333]  # list of seeds for experiments
     for seed in seeds:
         logging.info(f'Start experiments with the seed {seed} and mode {mode}')
         set_seeds(seed)
@@ -125,7 +125,7 @@ def main():
             logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
             # env.reset()
             # print(env.step(1))
-            r, l, Q = sarsa(env, 100000)
+            r, l, Q = sarsa(env, 1000000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         elif mode == 'random':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
