@@ -214,6 +214,7 @@ class CityEnv(gym.Env):
 
         meta_info = {'render.modes': ['console']}
         self.already_driven.append((new_pos_x, new_pos_y))
+        # print(self.already_driven)
         return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.float32), reward, done, meta_info
 
     def close(self):
@@ -348,50 +349,51 @@ class CityEnv(gym.Env):
         plt.show()
 
     def get_min_emission_action(self):
-        pos_x, pos_y = self.pos
-        position = self.vertices_matrix[pos_x, pos_y]
+        """
+        Choose the action with the lowest edge weight.
+        """
+        i, j = self.pos
+        start_vertex = self.vertices_matrix[i, j]
         action, min_weight = -1, float('inf')
-        for i, weight in enumerate(self.weighted_map[:, position]):
-            dest_pos = np.where(self.vertices_matrix == i)
-            actual_weight = weight * 1.2 if dest_pos in self.traffic_lights else weight
-            # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
-            if actual_weight and min_weight > actual_weight and dest_pos not in self.already_driven:
-                diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
-                if diff_x == 1:
-                    action = UP
-                elif diff_x == -1:
-                    action = DOWN
-                elif diff_y == 1:
-                    action = LEFT
-                else:
-                    action = RIGHT
-                min_weight = actual_weight
-        # check if action is -1 (happens when all neighbour nodes are already driven), here random should be used
-        if action == -1:
-            action = self.action_space.sample()
-        return action
+        actions = []
+        for i, (a, b) in enumerate([(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]):
+            # check for valid coordinates
+            if 0 <= a < self.height and 0 <= b < self.width:
+                target_vertex = self.vertices_matrix[a, b]
+                weight = self.weighted_map[target_vertex, start_vertex]
+                if weight > 0:
+                    actions.append(i)
+                    if (a, b) in self.traffic_lights:
+                        weight *= 1.2
+                    # Update the weight if a better weight was found.
+                    # It also should not be already visited to avoid endless loops
+                    if weight < min_weight and (a, b) not in self.already_driven:
+                        min_weight = weight
+                        action = i
+        # If no action was chosen, choose a random one which however is valid.
+        return action if action != -1 else np.random.choice(actions)
 
     def get_max_emission_action(self):
-        pos_x, pos_y = self.pos
-        position = self.vertices_matrix[pos_x, pos_y]
-        action, max_weight = -1, float('-inf')
-        for i, weight in enumerate(self.weighted_map[:, position]):
-            dest_pos = np.where(self.vertices_matrix == i)
-            actual_weight = weight * 1.2 if dest_pos in self.traffic_lights else weight
-            # update if better weight is found. It also shouldn't be already driven to avoid infinite loops
-            if actual_weight and max_weight < actual_weight and dest_pos not in self.already_driven:
-                dest_pos = np.where(self.vertices_matrix == i)
-                diff_x, diff_y = pos_x - dest_pos[0][0], pos_y - dest_pos[1][0]
-                if diff_x == 1:
-                    action = UP
-                elif diff_x == -1:
-                    action = DOWN
-                elif diff_y == 1:
-                    action = LEFT
-                else:
-                    action = RIGHT
-                max_weight = actual_weight
-        # check if action is -1 (happens when all neighbour nodes are already driven), here random should be used
-        if action == -1:
-            action = self.action_space.sample()
-        return action
+        """
+        Choose the action with the highest edge weight.
+        """
+        i, j = self.pos
+        start_vertex = self.vertices_matrix[i, j]
+        action, min_weight = -1, float('-inf')
+        actions = []
+        for i, (a, b) in enumerate([(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]):
+            # check for valid coordinates
+            if 0 <= a < self.height and 0 <= b < self.width:
+                target_vertex = self.vertices_matrix[a, b]
+                weight = self.weighted_map[target_vertex, start_vertex]
+                if weight > 0:
+                    actions.append(i)
+                    if (a, b) in self.traffic_lights:
+                        weight *= 1.2
+                    # Update the weight if a better weight was found.
+                    # It also should not be already visited to avoid endless loops
+                    if weight > min_weight and (a, b) not in self.already_driven:
+                        min_weight = weight
+                        action = i
+        # If no action was chosen, choose a random one which however is valid.
+        return action if action != -1 else np.random.choice(actions)

@@ -34,11 +34,16 @@ def run_agent(env, model):
     obs = env.reset()
     actions = []
     cum_r = 0
-    while True:  # TODO check if loop is correct for all agents
+    k = 0
+    done = False
+    while not done:
         action, _states = model.predict(obs, deterministic=True)
         actions.append(action)
         obs, reward, done, info = env.step(action)
         cum_r += reward
         # print(reward)
-        if done:
-            return cum_r, actions
+        k += 1
+        if k >= 500:
+            print("probably no solution found")
+            break
+    return cum_r, actions

@@ -4,6 +4,7 @@ import argparse
 import baselines
 from env import CityEnv
 from sarsa import *
+from test import *
 from experimental.CityEnv import CityEnv as Env
 from sb_agents import *
 from stable_baselines3.common.env_util import make_vec_env
@@ -108,7 +109,7 @@ def main():
     logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
     # check which method should be used
     mode = args.mode.lower()
-    if mode not in ['normal', 'experimental', 'random', 'min_weight', 'max_weight', 'a2c', 'ppo1', 'dqn']:
+    if mode not in ['normal', 'experimental', 'random', 'min_weight', 'max_weight', 'a2c', 'ppo', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
     seeds = [1111]  # list of seeds for experiments
@@ -128,16 +129,17 @@ def main():
             r, l, Q = sarsa(env, 1000000)
             cum_r, actions = evaluate_sarsa_policy(Q, env)
         elif mode == 'random':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
-            cum_r, actions = baselines.random_agent(env)
+            cum_r, actions = test_random_small()
+            # cum_r, actions = test_random_medium()
+            # cum_r, actions = test_random_large()
         elif mode == 'min_weight':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
-            env.draw_map()
-            cum_r, actions = baselines.min_weight_agent(env)
+            cum_r, actions = test_min_weight_small()
+            # cum_r, actions = test_max_weight_medium()
+            # cum_r, actions = test_min_weight_large()
         elif mode == 'max_weight':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2), (0, 2)])
-            env.draw_map()
-            cum_r, actions = baselines.max_weight_agent(env)
+            # cum_r, actions = test_max_weight_small()
+            # cum_r, actions = test_max_weight_medium()
+            cum_r, actions = test_max_weight_large()
         elif mode == 'a2c':
             env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 0), (2, 2)])
             env.draw_map()
@@ -145,10 +147,11 @@ def main():
             model = a2c_agent(env, total_timesteps=1000000, log_interval=100, seed=seed)
             logging.info("training done")
             cum_r, actions = run_agent(env, model)
-        elif mode == 'ppo1':
-            env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
-            check_env(env, warn=True)
-            model = ppo_agent(env)
+        elif mode == 'ppo':
+            env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
+            env.draw_map()
+            # check_env(env, warn=True)
+            model = ppo_agent(env, total_timesteps=1000000)
             logging.info("training done")
             cum_r, actions = run_agent(env, model)
         elif mode == 'dqn':
