@@ -322,7 +322,15 @@ class CityEnv(gym.Env):
         return np.round(self.dist_matrix * self.traffic_matrix, 2)
 
     def validate_accessibility(self, start_vertex, target_vertex):
-
+        """
+        Help-function to realise one-way streets and construction sites.
+        This function is used to check the accessibility/reachability from one node
+        to another ( a path will be searched).
+        Parameters:
+            start_vertex: Start point to find a path for.
+            target_vertex: End point to find a path for.
+        :return: boolean where True represents that a path was found and False represents that no path was found.
+        """
         # negative indices are not allowed (no path exists)
         if start_vertex < 0 or target_vertex < 0:
             return False
