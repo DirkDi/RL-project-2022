@@ -18,7 +18,7 @@ RIGHT = 3
 
 class CityEnv(gym.Env):
     """
-    An environment to simulate a city traffic
+    An environment to simulate a city traffic.
     """
 
     def __init__(self, height=3, width=3, min_distance=10, max_distance=100, min_traffic=1, max_traffic=2,
@@ -28,7 +28,7 @@ class CityEnv(gym.Env):
                  num_packages: int = 2, init_random=False, one_way=True, construction_sites=True,
                  traffic_lights=True):
         """
-        Initialize the environment
+        Initializes the environment.
         """
         super(CityEnv, self).__init__()
         # throw error message if environment is not possible
@@ -146,7 +146,7 @@ class CityEnv(gym.Env):
 
     def reset(self):
         """
-        Reset the environment
+        Resets the environment to the initial state
         """
         self.timer = 0
         self.pos = self.init_pos
@@ -156,7 +156,7 @@ class CityEnv(gym.Env):
 
     def step(self, action):
         """
-        Performs a step on the environment
+        Performs a step on the environment and calculates the specific reward of this step.
         """
         action = int(action)
         if action < 0 or action >= 4:
@@ -221,22 +221,29 @@ class CityEnv(gym.Env):
 
     def close(self):
         """
-        Make sure environment is closed
+        Makes sure that the environment is closed.
         """
         pass
 
     def render(self, mode="human"):
         """
-        Render the environment
+        Renders the environment.
         """
         pass
 
     def generate_traffic_lights(self):
+        """
+        Randomly choose positions where traffic lights are which make the node less efficient.
+        """
         for i in range(self.num_traffic_lights):
             self.traffic_lights.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
         logging.debug(f'Traffic lights:\n {self.traffic_lights}, amount: {self.num_traffic_lights}')
 
     def generate_one_way_streets(self):
+        """
+        Generates one-way streets by randomly transforming bidirectional edges to unidirectional ones,
+        always maintaining reachability to all nodes.
+        """
         used_points = []
         for i in range(self.num_one_way):
             taken_points = True
@@ -266,6 +273,10 @@ class CityEnv(gym.Env):
         logging.debug(f'One way streets:\n {used_points}, amount: {self.num_one_way}')
 
     def generate_construction_sites(self):
+        """
+        Generates construction sites by randomly removing edges,
+        always maintaining reachability to all nodes.
+        """
         used_points = []
         amount_points = self.height * self.width
         for i in range(self.num_construction_sites):
@@ -311,6 +322,16 @@ class CityEnv(gym.Env):
         return np.round(self.dist_matrix * self.traffic_matrix, 2)
 
     def validate_accessibility(self, start_vertex, target_vertex):
+        """
+        Help-function to realise one-way streets and construction sites.
+        This function is used to check the accessibility/reachability from one node
+        to another ( a path will be searched).
+        Parameters:
+            start_vertex: Start point to find a path for.
+            target_vertex: End point to find a path for.
+        :return: boolean where True represents that a path was found and False represents that no path was found.
+        """
+        # always true because start is also the end
         if start_vertex == target_vertex:
             return True
         queue = [start_vertex]
@@ -355,7 +376,8 @@ class CityEnv(gym.Env):
 
     def get_min_emission_action(self):
         """
-        Choose the action with the lowest edge weight.
+        Chooses the action with the lowest edge weight. If all possible edges from a node are already driven the function
+        chooses randomly a path to avoid an endless loop.
         """
         i, j = self.pos
         start_vertex = self.vertices_matrix[i, j]
@@ -381,7 +403,8 @@ class CityEnv(gym.Env):
 
     def get_max_emission_action(self):
         """
-        Choose the action with the highest edge weight.
+        Chooses the action with the highest edge weight. If all possible edges from a node are already driven
+        the function chooses randomly a path to avoid an endless loop.
         """
         i, j = self.pos
         start_vertex = self.vertices_matrix[i, j]

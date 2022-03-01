@@ -1,7 +1,18 @@
+import logging
 from stable_baselines3 import SAC, PPO, DQN, A2C
 
 
 def sac_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
+    """
+    Trains an agent with the SAC algorithm.
+        Parameters:
+            env: The training environment where the agent should learn.
+            total_timesteps: The total amount of timesteps for learning.
+            log_interval: The amount of logging the current learning state.
+            verbose: Integer to set the verbose mode for seeing specific information.
+            seed: Integer to realise reproducibility and avoid randomness.
+    :return: the trained model/agent
+    """
     model = SAC("MlpPolicy", env, verbose=verbose, seed=seed)
     model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('sac_city')
@@ -9,6 +20,16 @@ def sac_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
 
 
 def ppo_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
+    """
+    Trains an agent with the PPO algorithm.
+        Parameters:
+            env: The training environment where the agent should learn.
+            total_timesteps: The total amount of timesteps for learning.
+            log_interval: The amount of logging the current learning state.
+            verbose: Integer to set the verbose mode for seeing specific information.
+            seed: Integer to realise reproducibility and avoid randomness.
+    :return: the trained model/agent
+    """
     model = PPO("MlpPolicy", env, verbose=verbose, seed=seed)
     model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('ppo_city')
@@ -16,6 +37,16 @@ def ppo_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
 
 
 def dqn_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
+    """
+    Trains an agent with the DQN algorithm.
+        Parameters:
+            env: The training environment where the agent should learn.
+            total_timesteps: The total amount of timesteps for learning.
+            log_interval: The amount of logging the current learning state.
+            verbose: Integer to set the verbose mode for seeing specific information.
+            seed: Integer to realise reproducibility and avoid randomness.
+    :return: the trained model/agent
+    """
     model = DQN("MlpPolicy", env, verbose=verbose, seed=seed)
     model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('dqno_city')
@@ -23,6 +54,16 @@ def dqn_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
 
 
 def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
+    """
+    Trains an agent with the A2C algorithm.
+        Parameters:
+            env: The training environment where the agent should learn.
+            total_timesteps: The total amount of timesteps for learning.
+            log_interval: The amount of logging the current learning state.
+            verbose: Integer to set the verbose mode for seeing specific information.
+            seed: Integer to realise reproducibility and avoid randomness.
+    :return: the trained model/agent
+    """
     model = A2C("MlpPolicy", env, verbose=verbose, n_steps=100000, seed=seed)
     model.learn(total_timesteps=total_timesteps, log_interval=log_interval)
     # model.save('a2c_city')
@@ -55,9 +96,9 @@ def run_agent(env, model):
         actions.append(action)
         obs, reward, done, info = env.step(action)
         cum_r += reward
-        # print(reward)
+        # logging.debug(reward)
         k += 1
         if k >= 500:
-            print("probably no solution found")
+            logging.info("probably no solution found")
             break
     return cum_r, actions
