@@ -90,7 +90,6 @@ class CityEnv(gym.Env):
                 assert self.validate_accessibility(i, j), "The city graph is not connected!"
 
         self.timer = 0
-        self.num_packages = num_packages
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
             self.num_one_way = random.randint(1, min(self.height - 1, self.width - 1))
@@ -105,11 +104,14 @@ class CityEnv(gym.Env):
 
         if packages is None:
             packages = []
+            self.num_packages = num_packages
             if init_random:
                 for i in range(num_packages):
                     packages.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
             else:
                 packages.append((2, 1))
+        else:
+            self.num_packages = len(packages)
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
         logging.debug(f'Coordinates of packages are: {packages}')
