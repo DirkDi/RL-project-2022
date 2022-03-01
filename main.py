@@ -68,7 +68,7 @@ def test():
     env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix, traffic_lights=[(1, 0), (0, 1)])
     env.reset()
     # hyper_parameter_grid_search(env)
-    # print(env.packages)
+    # logging.info(env.packages)
     # env.draw_map()
     env.close()
     return 0, []
@@ -78,7 +78,7 @@ def test():
     pi = np.zeros((3, env.height, env.width))
     for (x, y, c), actions in Q.items():
         pi[c, x, y] = np.argmax(actions)
-    print(pi)
+    logging.debug(pi)
 
     cum_r, actions = evaluate_sarsa_policy(Q, env)
     return cum_r, actions

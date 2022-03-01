@@ -66,7 +66,7 @@ class CityEnv(gym.Env):
                             dist = random.randint(min_distance, max_distance) if init_random else 1
                             dist_matrix[start_vertex, target_vertex] = dist
                             dist_matrix[target_vertex, start_vertex] = dist
-        print("dist_matrix created")
+        logging.info("dist_matrix created")
         # create values for traffic
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_height, self.matrix_height))
@@ -81,7 +81,7 @@ class CityEnv(gym.Env):
                             flow = round(random.uniform(min_traffic, max_traffic), 2) if init_random else 1
                             traffic_matrix[start_vertex, target_vertex] = flow
                             traffic_matrix[target_vertex, start_vertex] = flow
-        print("traffic_matrix created")
+        logging.info("traffic_matrix created")
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
         # Check if city graph is connected
@@ -125,13 +125,13 @@ class CityEnv(gym.Env):
         logging.debug(f'The start position is {self.init_pos}')
 
         self.weighted_map = self.get_map()
-        print("weighted_map created")
+        logging.info("weighted_map created")
         if one_way:
             self.generate_one_way_streets()
-        print("one way streets created")
+        logging.info("one way streets created")
         if construction_sites:
             self.generate_construction_sites()
-        print("construction sites created")
+        logging.info("construction sites created")
         if traffic_lights:
             self.generate_traffic_lights()
         logging.debug(f'Distance matrix:\n{dist_matrix}')
@@ -216,7 +216,7 @@ class CityEnv(gym.Env):
 
         meta_info = {'render.modes': ['console']}
         self.already_driven.append((new_pos_x, new_pos_y))
-        # print(self.already_driven)
+        # logging.debug(self.already_driven)
         return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.int32), reward, done, meta_info
 
     def close(self):

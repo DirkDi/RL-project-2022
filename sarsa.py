@@ -100,7 +100,7 @@ def evaluate_sarsa_policy(env: gym.Env, q: DefaultDict[Tuple, np.ndarray]) -> Tu
         state = new_state
         k += 1
         if k >= 500:
-            print("probably no solution found")
+            logging.info("probably no solution found")
             break
     return cum_r, actions
 
@@ -109,7 +109,7 @@ def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
     """
     Saves the Q table into a csv-file.
     """
-    print("Saving Q table")
+    logging.info("Saving Q table")
     # NOTE: On Windows you have to set the newline flag
     #       on the empty string to write correctly line by line.
     with open(file_name + ".csv", "w+", newline="") as fd:
@@ -118,7 +118,7 @@ def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
         for key, value in q.items():
             w.writerow([key, value.tolist()])
             pbar.update(1)
-    print("Q table saved")
+    logging.info("Q table saved")
 
 
 def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> DefaultDict[Tuple, np.ndarray]:
@@ -126,14 +126,14 @@ def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> Def
     Loads the Q table from the csv-file.
     The policy will be extracted from this Q table.
     """
-    print("Loading Q table")
+    logging.info("Loading Q table")
     with open(file_name + ".csv") as fd:
         r = list(csv.reader(fd))
         pbar = tqdm(total=len(r))
         for key, value in r:
             q[eval(key)] = np.array(eval(value))
             pbar.update(1)
-    print("Q table loaded")
+    logging.info("Q table loaded")
     return q
 
 
@@ -147,8 +147,8 @@ def hyper_parameter_grid_search(env: gym.Env):
                 cum_r, actions = evaluate_sarsa_policy(q, env)
                 if cum_r > best_r:
                     best_r = cum_r
-                    print(alpha, gamma, epsilon)
-                    print(cum_r)
+                    logging.info(alpha, gamma, epsilon)
+                    logging.info(cum_r)
                     if len(actions) <= 50:
-                        print(actions)
+                        logging.info(actions)
     return
