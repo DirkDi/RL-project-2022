@@ -1,5 +1,4 @@
 from stable_baselines3 import SAC, PPO, DQN, A2C
-from stable_baselines3.common.callbacks import BaseCallback
 
 
 def sac_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
@@ -31,6 +30,21 @@ def a2c_agent(env, total_timesteps=1000, log_interval=10, verbose=1, seed=1234):
 
 
 def run_agent(env, model):
+    """
+    Runs the neural network driven agent on the environment.
+
+    Note that the test loop will be left after 500 steps
+    if it seems that the NN-driven agent have not learned
+    a useful policy (coded in the model.)
+
+        Parameters:
+            env: an environment
+            model: a neural network
+
+        Returns:
+            cum_r: cumulative reward the agent gained
+            actions: action sequence the agent performed
+    """
     obs = env.reset()
     actions = []
     cum_r = 0

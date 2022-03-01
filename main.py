@@ -118,10 +118,12 @@ def main():
         # logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
         # logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
         seeds = [1111]
-        episodes = [100000]
+        episodes = [2000]
         for seed, num_episodes in zip(seeds, episodes):
-            _, _, q = train_sarsa_small(num_episodes, seed)
-            cum_r, actions = test_sarsa_small(q=q, seed=seed)
+            # _, _, q = train_sarsa_small(num_episodes, seed, save=True)
+            cum_r, actions = test_sarsa_small(q=None, seed=seed, load=True)
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
     elif mode == 'random':
         cum_r, actions = test_random_small()
         # cum_r, actions = test_random_medium()
@@ -161,8 +163,6 @@ def main():
                       traffic_lights=not args.notrafficlights)
         # hyper_parameter_grid_search(env)
         cum_r, actions = 0, []
-    logging.info(f'The cummulative reward is {cum_r}')
-    logging.info(f'The optimal action sequence is {actions}')
 
 
 if __name__ == '__main__':

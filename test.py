@@ -8,7 +8,6 @@ from typing import DefaultDict, Tuple
 from env import CityEnv
 from sarsa import evaluate_sarsa_policy, load_q
 from baselines import random_agent, min_weight_agent, max_weight_agent
-from training import train_sarsa_small, train_sarsa_medium, train_sarsa_large
 
 
 def set_seeds(seed):
@@ -214,7 +213,7 @@ def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], seed: int = 1111, rand: 
 
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=3, width=3, packages=[(2, 2), (2, 0)])
-    env.draw_map()
+    # env.draw_map()
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))

@@ -7,7 +7,8 @@ from typing import DefaultDict, Callable, Tuple, List
 from collections import defaultdict
 
 
-def make_epsilon_greedy_policy(q: DefaultDict[Tuple, np.ndarray], epsilon: float, n_actions: int) -> Callable[[np.ndarray], int]:
+def make_epsilon_greedy_policy(q: DefaultDict[Tuple, np.ndarray],
+                               epsilon: float, n_actions: int) -> Callable[[np.ndarray], int]:
     def policy_fn(observation: np.ndarray) -> int:
         obs = tuple(observation.tolist())
         new_policy = np.ones((n_actions,)) * (epsilon / n_actions)
@@ -69,23 +70,39 @@ def sarsa(env: gym.Env, num_episodes: int, q: DefaultDict[Tuple, np.ndarray] = N
     return rewards, lens, q
 
 
-def evaluate_sarsa_policy(q, env):
+def evaluate_sarsa_policy(env: gym.Env, q: DefaultDict[Tuple, np.ndarray]) -> Tuple[float, List[int]]:
+    """
+    Evaluates the Q table on the environment.
+
+    Note that the test loop will be left after 500 steps
+    if it seems that the SARSA agent have not learned
+    a useful policy (coded in the Q table.)
+
+        Parameters:
+            q: Q table
+            env: an environment
+
+        Returns:
+            r_acc: cumulative reward the SARSA agent gained
+            actions: action sequence the SARSA agent performed
+    """
     state = env.reset()
     done = False
     policy = make_epsilon_greedy_policy(q, 0, env.action_space.n)
-    r_acc = 0
+    cum_r = 0
     actions = []
     k = 1
     while not done:
         action = policy(state)
         actions.append(action)
         new_state, reward, done, _ = env.step(action)
-        r_acc += reward
+        cum_r += reward
         state = new_state
         k += 1
-        if k >= 1000:
+        if k >= 500:
+            print("probably no solution found")
             break
-    return r_acc, actions
+    return cum_r, actions
 
 
 def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
@@ -93,7 +110,9 @@ def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
     Saves the Q table into a csv-file.
     """
     print("Saving Q table")
-    with open(file_name + ".csv", "w+") as fd:
+    # NOTE: On Windows you have to set the newline flag
+    #       on the empty string to write correctly line by line.
+    with open(file_name + ".csv", "w+", newline="") as fd:
         w = csv.writer(fd)
         pbar = tqdm(total=len(q))
         for key, value in q.items():
