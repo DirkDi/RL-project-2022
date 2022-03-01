@@ -331,6 +331,12 @@ class CityEnv(gym.Env):
             target_vertex: End point to find a path for.
         :return: boolean where True represents that a path was found and False represents that no path was found.
         """
+        # negative indices are not allowed (no path exists)
+        if start_vertex < 0 or target_vertex < 0:
+            return False
+        # nodes out of range are not allowed (no path exists)
+        if start_vertex > len(self.vertices_matrix) - 1 or target_vertex > len(self.vertices_matrix) - 1:
+            return False
         # always true because start is also the end
         if start_vertex == target_vertex:
             return True
