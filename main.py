@@ -84,25 +84,8 @@ def test():
     return cum_r, actions
 
 
-def random_agent(env):
-    state = env.reset()
-    done = False
-    r_acc = 0
-    actions = []
-    k = 1
-    while not done:
-        action = env.action_space.sample()
-        actions.append(action)
-        new_state, reward, done, _ = env.step(action)
-        r_acc += reward
-        state = new_state
-        k += 1
-    return r_acc, actions
-
-
 def main():
     args = argsparser()
-
     # use logging to get prints for debug/info/error mode
     log = logging.INFO
     if args.debug:
@@ -113,6 +96,7 @@ def main():
     if mode not in ['normal', 'experimental', 'random', 'min_weight', 'max_weight', 'a2c', 'ppo', 'dqn']:
         logging.error('The mode has to be normal or experimental.')
         return
+
     # logging.info(f'Start experiments with the seed {seed} and mode {mode}')
     if mode == 'normal':
         # logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
