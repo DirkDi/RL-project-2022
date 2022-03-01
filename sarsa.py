@@ -3,8 +3,8 @@ from tqdm import tqdm
 import csv
 import gym
 import logging
-from typing import DefaultDict, Callable, Tuple, List, Hashable
-from _collections import defaultdict
+from typing import DefaultDict, Callable, Tuple, List
+from collections import defaultdict
 
 
 def make_epsilon_greedy_policy(q: DefaultDict[Tuple, np.ndarray], epsilon: float, n_actions: int) -> Callable[[np.ndarray], int]:
@@ -20,7 +20,7 @@ def make_epsilon_greedy_policy(q: DefaultDict[Tuple, np.ndarray], epsilon: float
 
 
 def td_update(q: DefaultDict[Tuple, np.ndarray], state: np.ndarray, action: int, reward: float,
-              next_state: np.ndarray, next_action: int, gamma: float, alpha: float, done: bool) -> float:
+              next_state: np.ndarray, next_action: int, gamma: float, alpha: float, done: bool):
     state = tuple(state.tolist())
     current_q_value = q[state][action]
     td_target = reward
@@ -31,7 +31,7 @@ def td_update(q: DefaultDict[Tuple, np.ndarray], state: np.ndarray, action: int,
 
 def sarsa(env: gym.Env, num_episodes: int, q: DefaultDict[Tuple, np.ndarray] = None,
           gamma: float = 1.0, alpha: float = 0.5, epsilon: float = 0.1
-          ) -> Tuple[List[float], List[int], DefaultDict[Hashable, np.ndarray]]:
+          ) -> Tuple[List[float], List[int], DefaultDict[Tuple, np.ndarray]]:
     """
     Performs a training with the SARSA algorithm on the environment
     """
@@ -102,7 +102,7 @@ def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
     print("Q table saved")
 
 
-def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> DefaultDict[Hashable, np.ndarray]:
+def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> DefaultDict[Tuple, np.ndarray]:
     """
     Loads the Q table from the csv-file.
     The policy will be extracted from this Q table.

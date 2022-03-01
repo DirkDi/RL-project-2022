@@ -305,13 +305,10 @@ class CityEnv(gym.Env):
         logging.debug(f'Construction sites:\n {used_points}, amount: {self.num_construction_sites}')
 
     def get_map(self):
+        """
+        Computes the weight matrix by multiplying the distance matrix with the traffic matrix
+        """
         return np.round(self.dist_matrix * self.traffic_matrix, 2)
-        nodes = self.height * self.width
-        map_matrix = np.zeros((nodes, nodes))
-        for i in range(nodes):
-            for j in range(nodes):
-                map_matrix[i, j] = round(self.dist_matrix[i, j] * self.traffic_matrix[i, j], 2)
-        return map_matrix
 
     def validate_accessibility(self, start_vertex, target_vertex):
         if start_vertex == target_vertex:
@@ -331,6 +328,12 @@ class CityEnv(gym.Env):
         return False
 
     def draw_map(self):
+        """
+        Shows a graphic representation of the city graph.
+
+        Note that you have to close the window manually
+        before the program will go on.
+        """
         g = nx.DiGraph()
         pos = {}
         for v, p in zip(self.vertices_matrix.reshape(-1).tolist(), [
@@ -372,7 +375,8 @@ class CityEnv(gym.Env):
                     if weight < min_weight and (a, b) not in self.already_driven:
                         min_weight = weight
                         action = i
-        # If no action was chosen, choose a random one which however is valid.
+        # If no action was chosen, choose a random one which however is as valid
+        # as the agent moves forward and doesn't stay on the same place.
         return action if action != -1 else np.random.choice(actions)
 
     def get_max_emission_action(self):
@@ -397,5 +401,6 @@ class CityEnv(gym.Env):
                     if weight > min_weight and (a, b) not in self.already_driven:
                         min_weight = weight
                         action = i
-        # If no action was chosen, choose a random one which however is valid.
+        # If no action was chosen, choose a random one which however is as valid
+        # as the agent moves forward and doesn't stay on the same place.
         return action if action != -1 else np.random.choice(actions)
