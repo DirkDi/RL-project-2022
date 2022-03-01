@@ -139,7 +139,7 @@ class CityEnv(gym.Env):
         logging.debug(f'Weighted map matrix:\n{self.weighted_map}')
         low = np.array([0, 0, 0])
         high = np.array([self.height, self.width, num_packages])
-        self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.int32)
         self.action_space = gym.spaces.Discrete(4)  # up, down, left, right
         self.reward_range = [float("-inf"), 0]  # steps are negative rewards so the best possible reward is 0
         self.already_driven = [self.pos]  # contains the points where the agent already was
@@ -152,7 +152,7 @@ class CityEnv(gym.Env):
         self.pos = self.init_pos
         self.packages = self.packages_initial.copy()
         self.dist = 0
-        return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.float32)
+        return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.int32)
 
     def step(self, action):
         """
@@ -182,7 +182,7 @@ class CityEnv(gym.Env):
                 reward = 1 / dist_to_next_package
             """
             reward = -1000  # -10000 * (self.height * self.width)
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.int32), reward, False, {
                 'render.modes': ['console']}
         start_vertex = self.vertices_matrix[pos_x, pos_y]
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
@@ -191,7 +191,7 @@ class CityEnv(gym.Env):
         # action is not allowed if there is no vertex between both points (value is 0 for dist & traffic_flow)
         if not dist:
             reward = -1000  # -10000 * (self.height * self.width)
-            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.float32), reward, False, {
+            return np.array([pos_x, pos_y, len(self.packages)]).astype(np.int32), reward, False, {
                 'render.modes': ['console']}
 
         self.pos = new_pos_x, new_pos_y
@@ -199,7 +199,7 @@ class CityEnv(gym.Env):
         if self.pos in self.already_driven:
             self.already_driven.append(self.pos)
             # count = Counter(self.already_driven)[self.pos]
-            return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.float32), -10000 * (
+            return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.int32), -10000 * (
                     self.height * self.width), False, {'render.modes': ['console']}
         """
         complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 1.2 * dist * traffic_flow
@@ -217,7 +217,7 @@ class CityEnv(gym.Env):
         meta_info = {'render.modes': ['console']}
         self.already_driven.append((new_pos_x, new_pos_y))
         # print(self.already_driven)
-        return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.float32), reward, done, meta_info
+        return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.int32), reward, done, meta_info
 
     def close(self):
         """
