@@ -209,16 +209,80 @@ class Test(unittest.TestCase):
         """
         Checks if an action step inside the environment works correctly.
         """
-        # TODO: think about tests (what should be reached after specific action? what should happen if package is at
-        #  start point?)
-        pass
+        # create environment to make actions
+        dist = np.array([
+            [0, 1, 1, 0],
+            [1, 0, 0, 1],
+            [1, 0, 0, 1],
+            [0, 1, 1, 0]
+        ])
+        traffic = np.array([
+            [0, 5, 5, 0],
+            [5, 0, 0, 5],
+            [5, 0, 0, 5],
+            [0, 5, 5, 0]
+        ])
+        env = CityEnv(height=2, width=2, packages=[(0, 1), (1, 1)], dist_matrix=dist, traffic_matrix=traffic,
+                      one_way=False, construction_sites=False, traffic_lights=False)
+        env.init_pos = (0, 0)
+        # actions are defined from 0 to 3
+        with self.assertRaises(RuntimeError):
+            env.step(-1)
+        with self.assertRaises(RuntimeError):
+            env.step(4)
+        env.reset()
+        # test if unallowed directions are heavily penalized (-1000) and if position won't change after this action
+        _, reward, done, _ = env.step(0)
+        self.assertEqual(reward, -1000)
+        self.assertEqual(env.pos, (0, 0))
+        self.assertFalse(done)
+        env.reset()
+        _, reward, done, _ = env.step(2)
+        self.assertEqual(reward, -1000)
+        self.assertEqual(env.pos, (0, 0))
+        self.assertFalse(done)
+        # test if rewards are correct for allowed steps/actions
+        env.reset()
+        _, reward, done, _ = env.step(3)
+        self.assertEqual(reward, -5)
+        self.assertEqual(env.pos, (0, 1))
+        self.assertFalse(done)
+        _, reward, done, _ = env.step(1)
+        self.assertEqual(reward, -5)
+        self.assertEqual(env.pos, (1, 1))
+        self.assertTrue(done)
+        # test reward of traffic light (add traffic light to environment)
+        env.reset()
+        env.traffic_lights = [(0, 1)]
+        _, reward, _, _ = env.step(3)
+        self.assertEqual(reward, -6)
+        _, reward, _, _ = env.step(2)
+        self.assertEqual(reward, -5)
 
     def test_reset_environment(self):
         """
         Checks if the reset of the environment works correctly.
         """
-        # TODO: think about tests
-        pass
+        env = CityEnv(height=3, width=3, num_packages=4, one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        # get old packages to see if reset can load them.
+        old_packages = env.packages.copy()
+        # change variables to check if reset works correctly.
+        env.pos = (2, 2)
+        env.init_pos = (0, 0)
+        env.packages = []
+        # reset environment to test the initial position
+        init_values = env.reset()
+        # test if position is the initial position
+        self.assertEqual(env.pos, (init_values[0], init_values[1]))
+        self.assertEqual(env.pos, (0, 0))
+        self.assertEqual((init_values[0], init_values[1]), (0, 0))
+        # test if amount of packages is 4 (start amount)
+        self.assertEqual(init_values[2], len(env.packages))
+        self.assertEqual(init_values[2], 4)
+        self.assertEqual(len(env.packages), 4)
+        # test if the newly initialized packages are the same as previous
+        self.assertEqual(env.packages, old_packages)
 
     def test_get_max_emission_action(self):
         """

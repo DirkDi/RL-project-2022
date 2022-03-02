@@ -59,11 +59,10 @@ class CityEnv(gym.Env):
         self.max_distance = max_distance  # maximum distance between vertices
         self.min_traffic = min_traffic  # minimum traffic occurrence between vertices
         self.max_traffic = max_traffic  # maximum traffic occurrence between vertices
-
         # Create vertices matrix
         self.matrix_height = self.height * self.width
         self.vertices_matrix = np.reshape(np.arange(0, self.matrix_height), (-1, self.width))
-
+        # create distance matrix if it is None
         if dist_matrix is None:
             dist_matrix = np.zeros((self.matrix_height, self.matrix_height))
             for i in range(self.height):
@@ -78,7 +77,7 @@ class CityEnv(gym.Env):
                             dist_matrix[start_vertex, target_vertex] = dist
                             dist_matrix[target_vertex, start_vertex] = dist
         logging.info("dist_matrix created")
-        # create values for traffic
+        # create traffic matrix if it is None
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_height, self.matrix_height))
             for i in range(self.height):
@@ -100,7 +99,6 @@ class CityEnv(gym.Env):
             for j in range(self.matrix_height):
                 assert self.validate_accessibility(i, j), "The city graph is not connected!"
 
-        self.timer = 0
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
             self.num_one_way = random.randint(1, min(self.height - 1, self.width - 1))
@@ -111,7 +109,6 @@ class CityEnv(gym.Env):
             self.num_construction_sites = 0
             self.num_traffic_lights = 0
         self.traffic_lights = []  # list of coordinates with traffic lights
-        self.dist = 0
 
         if packages is None:
             packages = []
@@ -159,10 +156,8 @@ class CityEnv(gym.Env):
         """
         Resets the environment to the initial state
         """
-        self.timer = 0
         self.pos = self.init_pos
         self.packages = self.packages_initial.copy()
-        self.dist = 0
         return np.array([self.pos[0], self.pos[1], len(self.packages)]).astype(dtype=np.int32)
 
     def step(self, action):
@@ -173,7 +168,6 @@ class CityEnv(gym.Env):
         if action < 0 or action >= 4:
             raise RuntimeError(f"{action} is not a valid action (needs to be between 0 and 3)")
 
-        self.timer += 1
         pos_x, pos_y = self.pos
         new_pos_x, new_pos_y = pos_x, pos_y
         if action == UP and pos_x > 0:
@@ -204,17 +198,7 @@ class CityEnv(gym.Env):
             reward = -1000  # -10000 * (self.height * self.width)
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.int32), reward, False, {
                 'render.modes': ['console']}
-
         self.pos = new_pos_x, new_pos_y
-        """
-        if self.pos in self.already_driven:
-            self.already_driven.append(self.pos)
-            # count = Counter(self.already_driven)[self.pos]
-            return np.array([new_pos_x, new_pos_y, len(self.packages)]).astype(np.int32), -10000 * (
-                    self.height * self.width), False, {'render.modes': ['console']}
-        """
-        complete_dist = dist * traffic_flow if self.pos in self.traffic_lights else 1.2 * dist * traffic_flow
-        self.dist += complete_dist
         reward = -(dist * traffic_flow) if self.pos not in self.traffic_lights else -(
                 dist * traffic_flow) * 1.2
         if (new_pos_x, new_pos_y) in self.packages:
