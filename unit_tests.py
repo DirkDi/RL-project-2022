@@ -49,17 +49,100 @@ class Test(unittest.TestCase):
 
     def test_weighted_map(self):
         """
-        Checks if the weighted map is correctly created from the distance matrix, traffic matrix and traffic lights.
+        Checks if the weighted map is correctly created from the distance matrix and traffic matrix.
         """
-        # TODO: think about tests
-        pass
+        # create different distance and traffic matrices to check edge cases
+        dist1 = np.ones((9, 9)) * 10
+        traffic1 = np.ones((9, 9)) * 1.5
+        correct_map1 = np.ones((9, 9)) * 15
+        env1 = CityEnv(height=3, width=3, dist_matrix=dist1, traffic_matrix=traffic1, one_way=False,
+                       construction_sites=False, traffic_lights=False)
+        dist2 = np.zeros((9, 9))
+        traffic2 = np.ones((9, 9))
+        correct_map2 = np.zeros((9, 9))
+        env2 = CityEnv(height=3, width=3, dist_matrix=dist2, traffic_matrix=traffic2, one_way=False,
+                       construction_sites=False, traffic_lights=False)
+        dist3 = np.ones((9, 9))
+        traffic3 = np.zeros((9, 9))
+        correct_map3 = np.zeros((9, 9))
+        env3 = CityEnv(height=3, width=3, dist_matrix=dist3, traffic_matrix=traffic3, one_way=False,
+                       construction_sites=False, traffic_lights=False)
+        dist4 = np.zeros((9, 9))
+        traffic4 = np.zeros((9, 9))
+        correct_map4 = np.zeros((9, 9))
+        env4 = CityEnv(height=3, width=3, dist_matrix=dist4, traffic_matrix=traffic4, one_way=False,
+                       construction_sites=False, traffic_lights=False)
+        # test the environments
+        self.assertEqual(env1.weighted_map, correct_map1)
+        self.assertEqual(env1.get_map(), correct_map1)
+        self.assertEqual(env2.weighted_map, correct_map2)
+        self.assertEqual(env2.get_map(), correct_map2)
+        self.assertEqual(env3.weighted_map, correct_map3)
+        self.assertEqual(env3.get_map(), correct_map3)
+        self.assertEqual(env4.weighted_map, correct_map4)
+        self.assertEqual(env4.get_map(), correct_map4)
 
     def test_environment_creation(self):
         """
         Checks if the creation of the environment is allowed or not and if parameters work correctly.
         """
-        # TODO: think about tests
-        pass
+        # check if assertion is raised if one of the variables "height", "width", "min_distance", "max_distance",
+        #                                 "min_traffic", "max_traffic", "num_packages" is <= 0.
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=-1, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=-1, width=3, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=-1, width=-1, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=0, width=0, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, min_distance=0, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, min_distance=0, max_distance=0, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, min_traffic=0, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, min_traffic=0, max_traffic=0, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, num_packages=0, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        # check if assertion is raised if "max_distance" is < "min_distance" or "max_traffic" < "min_traffic".
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, min_distance=5, max_distance=4, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, min_traffic=5, max_traffic=4, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        # check if the variable "num_packages" is correct after giving default packages
+        env = CityEnv(height=3, width=3, packages=[(0, 1), (1, 0), (1, 1), (2, 0)], one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual(env.num_packages, 4)
+        self.assertEqual(len(env.packages), 4)
+        env = CityEnv(height=3, width=3, packages=[(0, 1)], one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual(env.num_packages, 1)
+        self.assertEqual(len(env.packages), 1)
+        env = CityEnv(height=3, width=3, num_packages=100, packages=[(0, 1), (1, 0)], one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual(env.num_packages, 2)
+        self.assertEqual(len(env.packages), 2)
+        env = CityEnv(height=3, width=3, num_packages=4, packages=[], one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual(env.num_packages, 4)
+        self.assertEqual(len(env.packages), 4)
+        env = CityEnv(height=3, width=3, one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual(env.num_packages, 2)
+        self.assertEqual(len(env.packages), 2)
 
     def test_action_step(self):
         """
