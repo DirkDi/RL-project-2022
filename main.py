@@ -36,6 +36,7 @@ def set_seeds(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.manual_seed(seed)
+    torch.use_deterministic_algorithms(True)
 
 
 def test():

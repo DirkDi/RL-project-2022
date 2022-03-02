@@ -1,4 +1,5 @@
 import random
+import logging
 import numpy as np
 import torch
 
@@ -288,75 +289,51 @@ def test():
     Tests the agents.
     """
     for seed in [1111, 2222, 3333]:
-        print("Testing with seed:", seed)
+        logging.info("Testing with seed:", seed)
 
-        print("Testing the random agent")
+        logging.info("Testing the random agent")
 
         cum_r, actions = test_random_small(seed)
-        print("Results for the small field (3 x 3):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_random_medium(seed)
-        print("Results for the small field (5 x 5):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_random_large(seed)
-        print("Results for the small field (10 x 10):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
-        print("Testing the min-weight-agent")
+        logging.info("Testing the min-weight-agent")
 
         cum_r, actions = test_min_weight_small(seed)
-        print("Results for the small field (3 x 3):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_min_weight_medium(seed)
-        print("Results for the small field (5 x 5):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_min_weight_large(seed)
-        print("Results for the small field (10 x 10):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
-        print("Testing the max-weight-agent")
+        logging.info("Testing the max-weight-agent")
 
         cum_r, actions = test_max_weight_small(seed)
-        print("Results for the small field (3 x 3):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_max_weight_medium(seed)
-        print("Results for the small field (5 x 5):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_max_weight_large(seed)
-        print("Results for the small field (10 x 10):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
-        print("Testing the SARSA agent")
+        logging.info("Testing the SARSA agent")
 
         cum_r, actions = test_sarsa_small(None, seed, load=True)
-        print("Results for the small field (3 x 3):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_sarsa_medium(None, seed, load=True)
-        print("Results for the small field (5 x 5):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
         cum_r, actions = test_sarsa_large(None, seed, load=True)
-        print("Results for the small field (10 x 10):")
-        print("cumulative reward:", cum_r)
-        print("action sequence:", actions)
+        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
 
 
 if __name__ == '__main__':

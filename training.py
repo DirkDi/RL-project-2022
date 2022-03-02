@@ -17,7 +17,7 @@ def set_seeds(seed: int):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-    # torch.use_deterministic_algorithms(True)
+    torch.use_deterministic_algorithms(True)
 
 
 def train_sarsa_small(num_episodes: int, seed: int = 1111,
