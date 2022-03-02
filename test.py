@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from collections import defaultdict
-from typing import DefaultDict, Tuple
+from typing import DefaultDict, Tuple, List, Optional
 
 from env import CityEnv
 from sarsa import evaluate_sarsa_policy, load_q
@@ -14,8 +14,7 @@ def set_seeds(seed):
     """
     Set all random generators used to a specific seed
 
-        Parameters:
-            seed: an integer
+    :param seed: an integer
     """
     random.seed(seed)
     np.random.seed(seed)
@@ -23,191 +22,190 @@ def set_seeds(seed):
     # torch.use_deterministic_algorithms(True)
 
 
-def test_random_small(seed: int = 1111, rand: bool = True):
+def test_random_small(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the randomly acting agent on the environment of field 3 x 3
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=3, width=3, packages=[(2, 2), (2, 0)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = random_agent(env)
     return cum_r, actions
 
 
-def test_random_medium(seed: int = 2222, rand: bool = True):
+def test_random_medium(seed: int = 2222, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the randomly acting agent on the environment of field 5 x 5
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = random_agent(env)
     return cum_r, actions
 
 
-def test_random_large(seed: int = 3333, rand: bool = True):
+def test_random_large(seed: int = 3333, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the randomly acting agent on the environment of field 10 x 10
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=10, width=10, packages=[(0, 2), (7, 2), (5, 5), (3, 8)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = random_agent(env)
     return cum_r, actions
 
 
-def test_min_weight_small(seed: int = 1111, rand: bool = True):
+def test_min_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the minimal weight searching agent on the environment of field 3 x 3
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=3, width=3, packages=[(2, 2), (2, 0)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = min_weight_agent(env)
     return cum_r, actions
 
 
-def test_min_weight_medium(seed: int = 2222, rand: bool = True):
+def test_min_weight_medium(seed: int = 2222, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the minimal weight searching agent on the environment of field 5 x 5
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = min_weight_agent(env)
     return cum_r, actions
 
 
-def test_min_weight_large(seed: int = 3333, rand: bool = True):
+def test_min_weight_large(seed: int = 3333, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the minimal weight searching agent on the environment of field 10 x 10
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=10, width=10, packages=[(0, 2), (7, 2), (5, 5), (3, 8)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = min_weight_agent(env)
     return cum_r, actions
 
 
-def test_max_weight_small(seed: int = 1111, rand: bool = True):
+def test_max_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the maximal weight searching agent on the environment of field 3 x 3
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=3, width=3, packages=[(2, 2), (2, 0)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = max_weight_agent(env)
     return cum_r, actions
 
 
-def test_max_weight_medium(seed: int = 2222, rand: bool = True):
+def test_max_weight_medium(seed: int = 2222, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the maximal weight searching agent on the environment of field 5 x 5
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = max_weight_agent(env)
     return cum_r, actions
 
 
-def test_max_weight_large(seed: int = 3333, rand: bool = True):
+def test_max_weight_large(seed: int = 3333, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the maximal weight searching agent on the environment of field 10 x 10
 
-        Parameters:
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the random agent gained
-            actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the random agent gained
+    :return actions: action sequence the random agent performed
     """
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=10, width=10, packages=[(0, 2), (7, 2), (5, 5), (3, 8)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     cum_r, actions = max_weight_agent(env)
     return cum_r, actions
 
 
-def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], draw_map: bool, seed: int = 1111, rand: bool = True,
-                     load: bool = False):
+def test_sarsa_small(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1111,
+                     rand: bool = True, load: bool = False, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the SARSA agent on the environment of field 3 x 3
 
-        Parameters:
-            q: Q table
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
-            load: boolean flag for loading the Q table
+    :param q: Q table
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param load: boolean flag for loading the Q table
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the SARSA agent gained
-            actions: action sequence the SARSA agent performed
+    :return cum_r: cumulative reward the SARSA agent gained
+    :return actions: action sequence the SARSA agent performed
     """
     # Check that the Q table is not empty or that the load flag is set to True
     assert q is not None or load
@@ -219,26 +217,25 @@ def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], draw_map: bool, seed: in
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))
-        file_name = "q_sarsa_small_" + str(seed)
+        file_name = f"q_sarsa_small_{seed}"
         q = load_q(q, file_name)
     cum_r, actions = evaluate_sarsa_policy(env, q)
     return cum_r, actions
 
 
-def test_sarsa_medium(q: DefaultDict[Tuple, np.ndarray], draw_map: bool,  seed: int = 2222, rand: bool = True,
-                      load: bool = False):
+def test_sarsa_medium(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1111,
+                      rand: bool = True, load: bool = False, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the SARSA agent on the environment of field 5 x 5
 
-        Parameters:
-            q: Q table
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
-            load: boolean flag for loading the Q table
+    :param q: Q table
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param load: boolean flag for loading the Q table
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the SARSA agent gained
-            actions: action sequence the SARSA agent performed
+    :return cum_r: cumulative reward the SARSA agent gained
+    :return actions: action sequence the SARSA agent performed
     """
     # Check that the Q table is not empty or that the load flag is set to True
     assert q is not None or load
@@ -250,26 +247,25 @@ def test_sarsa_medium(q: DefaultDict[Tuple, np.ndarray], draw_map: bool,  seed: 
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))
-        file_name = "q_sarsa_medium_" + str(seed)
+        file_name = f"q_sarsa_medium_{seed}"
         q = load_q(q, file_name)
     cum_r, actions = evaluate_sarsa_policy(env, q)
     return cum_r, actions
 
 
-def test_sarsa_large(q: DefaultDict[Tuple, np.ndarray], draw_map: bool, seed: int = 3333, rand: bool = True,
-                     load: bool = False):
+def test_sarsa_large(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1111,
+                     rand: bool = True, load: bool = False, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the SARSA agent on the environment of field 10 x 10
 
-        Parameters:
-            q: Q table
-            seed: an integer
-            rand: boolean flag for the randomness of the environment
-            load: boolean flag for loading the Q table
+    :param q: Q table
+    :param seed: an integer
+    :param rand: boolean flag for the randomness of the environment
+    :param load: boolean flag for loading the Q table
+    :param draw_map: boolean flag for showing the map
 
-        Returns:
-            cum_r: cumulative reward the SARSA agent gained
-            actions: action sequence the SARSA agent performed
+    :return cum_r: cumulative reward the SARSA agent gained
+    :return actions: action sequence the SARSA agent performed
     """
     # Check that the Q table is not empty or that the load flag is set to True
     assert q is not None or load
@@ -281,7 +277,87 @@ def test_sarsa_large(q: DefaultDict[Tuple, np.ndarray], draw_map: bool, seed: in
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))
-        file_name = "q_sarsa_large_" + str(seed)
+        file_name = f"q_sarsa_large_{seed}"
         q = load_q(q, file_name)
     cum_r, actions = evaluate_sarsa_policy(env, q)
     return cum_r, actions
+
+
+def test():
+    """
+    Tests the agents.
+    """
+    for seed in [1111, 2222, 3333]:
+        print("Testing with seed:", seed)
+
+        print("Testing the random agent")
+
+        cum_r, actions = test_random_small(seed)
+        print("Results for the small field (3 x 3):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_random_medium(seed)
+        print("Results for the small field (5 x 5):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_random_large(seed)
+        print("Results for the small field (10 x 10):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        print("Testing the min-weight-agent")
+
+        cum_r, actions = test_min_weight_small(seed)
+        print("Results for the small field (3 x 3):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_min_weight_medium(seed)
+        print("Results for the small field (5 x 5):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_min_weight_large(seed)
+        print("Results for the small field (10 x 10):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        print("Testing the max-weight-agent")
+
+        cum_r, actions = test_max_weight_small(seed)
+        print("Results for the small field (3 x 3):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_max_weight_medium(seed)
+        print("Results for the small field (5 x 5):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_max_weight_large(seed)
+        print("Results for the small field (10 x 10):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        print("Testing the SARSA agent")
+
+        cum_r, actions = test_sarsa_small(None, seed, load=True)
+        print("Results for the small field (3 x 3):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_sarsa_medium(None, seed, load=True)
+        print("Results for the small field (5 x 5):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+        cum_r, actions = test_sarsa_large(None, seed, load=True)
+        print("Results for the small field (10 x 10):")
+        print("cumulative reward:", cum_r)
+        print("action sequence:", actions)
+
+
+if __name__ == '__main__':
+    test()

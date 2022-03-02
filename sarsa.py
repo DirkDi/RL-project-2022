@@ -9,7 +9,23 @@ from collections import defaultdict
 
 def make_epsilon_greedy_policy(q: DefaultDict[Tuple, np.ndarray],
                                epsilon: float, n_actions: int) -> Callable[[np.ndarray], int]:
+    """
+    Creates an epsilon-greedy policy.
+
+    :param q: Q table
+    :param epsilon: exploration rate
+    :param n_actions: size of action space
+
+    :return: function that expects a state and returns an action based on the policy
+    """
     def policy_fn(observation: np.ndarray) -> int:
+        """
+        Returns an action depending on an observation
+
+        :param observation: observed state
+
+        :return: an action
+        """
         obs = tuple(observation.tolist())
         new_policy = np.ones((n_actions,)) * (epsilon / n_actions)
         policy = q[obs]
@@ -22,6 +38,19 @@ def make_epsilon_greedy_policy(q: DefaultDict[Tuple, np.ndarray],
 
 def td_update(q: DefaultDict[Tuple, np.ndarray], state: np.ndarray, action: int, reward: float,
               next_state: np.ndarray, next_action: int, gamma: float, alpha: float, done: bool):
+    """
+    Updates the Q table using the temporal difference formula
+
+    :param q: Q table
+    :param state: current state
+    :param action: action for the current state
+    :param reward: reward gained for the current state and action
+    :param next_state:
+    :param next_action:
+    :param gamma: discount factor
+    :param alpha: learning rate
+    :param done: boolean flag
+    """
     state = tuple(state.tolist())
     current_q_value = q[state][action]
     td_target = reward
@@ -35,6 +64,17 @@ def sarsa(env: gym.Env, num_episodes: int, q: DefaultDict[Tuple, np.ndarray] = N
           ) -> Tuple[List[float], List[int], DefaultDict[Tuple, np.ndarray]]:
     """
     Performs a training with the SARSA algorithm on the environment
+
+    :param env: an environment
+    :param num_episodes: amount of episodes the agent should learn
+    :param q: Q table, if None a new one will be created
+    :param gamma: discount factor
+    :param alpha: learning rate
+    :param epsilon: exploration rate
+
+    :return rewards: list of rewards the agent gained per episode
+    :return lens: list of lengths of the episodes the agent trained
+    :return q: Q table
     """
     if q is None:
         q = defaultdict(lambda: np.zeros(env.action_space.n))
@@ -75,16 +115,14 @@ def evaluate_sarsa_policy(env: gym.Env, q: DefaultDict[Tuple, np.ndarray]) -> Tu
     Evaluates the Q table on the environment.
 
     Note that the test loop will be left after 500 steps
-    if it seems that the SARSA agent have not learned
+    if it seems that the SARSA agent has not learned
     a useful policy (coded in the Q table.)
 
-        Parameters:
-            q: Q table
-            env: an environment
+    :param q: Q table
+    :param env: an environment
 
-        Returns:
-            r_acc: cumulative reward the SARSA agent gained
-            actions: action sequence the SARSA agent performed
+    :return cum_r: cumulative reward the SARSA agent gained
+    :return actions: action sequence the SARSA agent performed
     """
     state = env.reset()
     done = False
@@ -108,6 +146,9 @@ def evaluate_sarsa_policy(env: gym.Env, q: DefaultDict[Tuple, np.ndarray]) -> Tu
 def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
     """
     Saves the Q table into a csv-file.
+
+    :param q: Q table
+    :param file_name: a string
     """
     logging.info("Saving Q table")
     # NOTE: On Windows you have to set the newline flag
@@ -124,7 +165,11 @@ def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
 def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> DefaultDict[Tuple, np.ndarray]:
     """
     Loads the Q table from the csv-file.
-    The policy will be extracted from this Q table.
+
+    :param q: Q table to write in
+    :param file_name: a string
+
+    :return q: the updated Q table
     """
     logging.info("Loading Q table")
     with open(file_name + ".csv") as fd:

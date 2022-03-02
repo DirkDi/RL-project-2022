@@ -1,13 +1,10 @@
 import numpy as np
 import gym
-import sys
+
 import logging
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
-import time
-import pylab
-from collections import Counter
 
 # Actions
 UP = 0
@@ -24,8 +21,8 @@ class CityEnv(gym.Env):
     def __init__(self, height=3, width=3, min_distance=10, max_distance=100, min_traffic=1, max_traffic=2,
                  dist_matrix: np.ndarray = None,
                  traffic_matrix: np.ndarray = None,
-                 packages=None,
-                 num_packages: int = 2, init_random=False, one_way=True, construction_sites=True,
+                 packages=None, num_packages: int = 2,
+                 init_random=False, one_way=True, construction_sites=True,
                  traffic_lights=True):
         """
         Initializes the environment.
@@ -55,21 +52,24 @@ class CityEnv(gym.Env):
         else:
             self.height = height
             self.width = width
+
         self.min_distance = min_distance  # minimum distance between vertices
         self.max_distance = max_distance  # maximum distance between vertices
         self.min_traffic = min_traffic  # minimum traffic occurrence between vertices
         self.max_traffic = max_traffic  # maximum traffic occurrence between vertices
+
         # Create vertices matrix
         self.matrix_height = self.height * self.width
         self.vertices_matrix = np.reshape(np.arange(0, self.matrix_height), (-1, self.width))
+
         # create distance matrix if it is None
         if dist_matrix is None:
             dist_matrix = np.zeros((self.matrix_height, self.matrix_height))
-            for i in range(self.height):
-                for j in range(self.width):
+            for i in range(height):
+                for j in range(width):
                     start_vertex = self.vertices_matrix[i, j]
                     for a, b in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
-                        if 0 <= a < self.height and 0 <= b < self.width:
+                        if 0 <= a < height and 0 <= b < width:
                             target_vertex = self.vertices_matrix[a, b]
                             if dist_matrix[start_vertex, target_vertex] > 0:
                                 continue
@@ -77,14 +77,15 @@ class CityEnv(gym.Env):
                             dist_matrix[start_vertex, target_vertex] = dist
                             dist_matrix[target_vertex, start_vertex] = dist
         logging.info("dist_matrix created")
+
         # create traffic matrix if it is None
         if traffic_matrix is None:
             traffic_matrix = np.zeros((self.matrix_height, self.matrix_height))
-            for i in range(self.height):
-                for j in range(self.width):
+            for i in range(height):
+                for j in range(width):
                     start_vertex = self.vertices_matrix[i, j]
                     for a, b in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
-                        if 0 <= a < self.height and 0 <= b < self.width:
+                        if 0 <= a < height and 0 <= b < width:
                             target_vertex = self.vertices_matrix[a, b]
                             if traffic_matrix[start_vertex, target_vertex] > 0:
                                 continue
@@ -92,8 +93,10 @@ class CityEnv(gym.Env):
                             traffic_matrix[start_vertex, target_vertex] = flow
                             traffic_matrix[target_vertex, start_vertex] = flow
         logging.info("traffic_matrix created")
+
         self.dist_matrix = dist_matrix.copy()
         self.traffic_matrix = traffic_matrix.copy()
+
         # Check if city graph is connected
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
@@ -145,6 +148,7 @@ class CityEnv(gym.Env):
         logging.debug(f'Distance matrix:\n{dist_matrix}')
         logging.debug(f'Traffic matrix:\n{traffic_matrix}')
         logging.debug(f'Weighted map matrix:\n{self.weighted_map}')
+
         low = np.array([0, 0, 0])
         high = np.array([self.height, self.width, num_packages])
         self.observation_space = gym.spaces.Box(low=low, high=high, dtype=np.int32)
@@ -321,9 +325,10 @@ class CityEnv(gym.Env):
         Help-function to realise one-way streets and construction sites.
         This function is used to check the accessibility/reachability from one node
         to another ( a path will be searched).
-        Parameters:
-            start_vertex: Start point to find a path for.
-            target_vertex: End point to find a path for.
+
+        :param start_vertex: Start point to find a path for.
+        :param target_vertex: End point to find a path for.
+
         :return: boolean where True represents that a path was found and False represents that no path was found.
         """
         # negative indices are not allowed (no path exists)
