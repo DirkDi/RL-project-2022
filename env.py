@@ -36,13 +36,25 @@ class CityEnv(gym.Env):
                                 min_traffic, max_traffic, num_packages]) > 0), "all arguments must be non-negative!"
         assert min_distance < max_distance and min_traffic < max_traffic, \
             "minimum values have to be lower than maximum values!"
+        assert (dist_matrix is not None and traffic_matrix is not None) or \
+               (dist_matrix is None and traffic_matrix is None), "if one matrix is defined the other must be too!"
         if dist_matrix is not None:
             assert np.all(dist_matrix >= 0), "all entries in the distance matrix must not be non-negative!"
         if traffic_matrix is not None:
             assert np.all(traffic_matrix >= 0), "all entries in the traffic matrix must not be non-negative!"
-
-        self.height = height
-        self.width = width
+        if dist_matrix is not None and traffic_matrix is not None:
+            # check if distance and traffic matrix have the same dimension
+            assert dist_matrix.shape == traffic_matrix.shape, \
+                "traffic and distance matrix need to have the same dimension!"
+            # check if distance and traffic matrix have the same edges
+            dist_idx = np.argwhere(dist_matrix > 0)
+            traffic_idx = np.argwhere(traffic_matrix > 0)
+            assert np.array_equal(dist_idx, traffic_idx), "traffic and distance matrix need to have the same edges!"
+            self.height = dist_matrix.shape[0]
+            self.width = dist_matrix.shape[1]
+        else:
+            self.height = height
+            self.width = width
         self.min_distance = min_distance  # minimum distance between vertices
         self.max_distance = max_distance  # maximum distance between vertices
         self.min_traffic = min_traffic  # minimum traffic occurrence between vertices

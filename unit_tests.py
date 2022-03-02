@@ -122,6 +122,67 @@ class Test(unittest.TestCase):
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=3, min_traffic=5, max_traffic=4, one_way=False,
                     construction_sites=False, traffic_lights=False)
+        # check if assertion is raised if "distance_matrix" or "traffic_matrix" contains negative values.
+        neg_dist = np.array([
+            [0, 1, 0, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, -1, 0]
+        ])
+        neg_traffic = np.array([
+            [0, 1, 0, 0],
+            [-1, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 1, 0]
+        ])
+        pos_dist = np.array([
+            [0, 1, 0, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 1, 0]
+        ])
+        pos_traffic = np.array([
+            [0, 1, 0, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 1, 0]
+        ])
+        with self.assertRaises(AssertionError):
+            CityEnv(height=2, width=2, dist_matrix=neg_dist, traffic_matrix=neg_traffic, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=2, width=2, dist_matrix=neg_dist, traffic_matrix=pos_traffic, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        with self.assertRaises(AssertionError):
+            CityEnv(height=2, width=2, dist_matrix=pos_dist, traffic_matrix=neg_traffic, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        # check if assertion is raised if "dist_matrix" and "traffic_matrix" have not the same dimension
+        with self.assertRaises(AssertionError):
+            dist = np.ones((2, 2))
+            traffic = np.ones((3, 3))
+            CityEnv(dist_matrix=dist, traffic_matrix=traffic, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        # check if assertion is raised if "dist_matrix" and "traffic_matrix" have not the same edges
+        with self.assertRaises(AssertionError):
+            dist = np.ones((2, 2))
+            traffic = np.zeros((2, 2))
+            CityEnv(dist_matrix=dist, traffic_matrix=traffic, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        # check if "height" and "width" values are correct after initialization
+        env = CityEnv(height=2, width=2, one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual((env.height, env.width), (2, 2))
+        env = CityEnv(height=5, width=5, one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual((env.height, env.width), (5, 5))
+        env = CityEnv(one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual((env.height, env.width), (3, 3))
+        dist = np.ones((3, 3))
+        traffic = np.ones((3, 3))
+        env = CityEnv(height=1, width=1, dist_matrix=dist, traffic_matrix=traffic, one_way=False,
+                      construction_sites=False, traffic_lights=False)
+        self.assertEqual((env.height, env.width), (3, 3))
         # check if the variable "num_packages" is correct after giving default packages
         env = CityEnv(height=3, width=3, packages=[(0, 1), (1, 0), (1, 1), (2, 0)], one_way=False,
                       construction_sites=False, traffic_lights=False)
