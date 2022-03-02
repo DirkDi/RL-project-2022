@@ -284,57 +284,41 @@ def test_sarsa_large(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 11
     return cum_r, actions
 
 
+def test_agent(name, seed, tests):
+    """
+    Tests specific agent with the corresponding test functions.
+    :param name: name of the agent
+    :param seed: the random seed for testing
+    :param tests: array which contains the functions for tests
+    """
+    logging.info(f"Testing the {name}")
+    cum_r, actions = tests[0](seed) if name != "sarsa agent" else tests[0](None, seed, load=True)
+    logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
+    cum_r, actions = tests[1](seed) if name != "sarsa agent" else tests[1](None, seed, load=True)
+    logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
+    cum_r, actions = tests[2](seed) if name != "sarsa agent" else tests[2](None, seed, load=True)
+    logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
+
+
 def test():
     """
     Tests the agents.
     """
+    agent_func_dict = {
+        "random agent": [test_random_small, test_random_medium, test_random_large],
+        "min-weight-agent": [test_min_weight_small, test_min_weight_medium, test_min_weight_large],
+        "max-weight-agent": [test_max_weight_small, test_max_weight_medium, test_max_weight_large],
+        "sarsa agent": [test_sarsa_small, test_sarsa_medium, test_sarsa_large],
+    }
     for seed in [1111, 2222, 3333]:
-        logging.info("Testing with seed:", seed)
+        logging.info(f"Testing with seed: {seed}")
 
-        logging.info("Testing the random agent")
-
-        cum_r, actions = test_random_small(seed)
-        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_random_medium(seed)
-        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_random_large(seed)
-        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        logging.info("Testing the min-weight-agent")
-
-        cum_r, actions = test_min_weight_small(seed)
-        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_min_weight_medium(seed)
-        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_min_weight_large(seed)
-        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        logging.info("Testing the max-weight-agent")
-
-        cum_r, actions = test_max_weight_small(seed)
-        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_max_weight_medium(seed)
-        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_max_weight_large(seed)
-        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        logging.info("Testing the SARSA agent")
-
-        cum_r, actions = test_sarsa_small(None, seed, load=True)
-        logging.info(f"Results for the small field (3 x 3):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_sarsa_medium(None, seed, load=True)
-        logging.info(f"Results for the medium field (5 x 5):\ncumulative reward: {cum_r}\naction sequence: {actions}")
-
-        cum_r, actions = test_sarsa_large(None, seed, load=True)
-        logging.info(f"Results for the large field (10 x 10):\ncumulative reward: {cum_r}\naction sequence: {actions}")
+        test_agent("random agent", seed, agent_func_dict["random agent"])
+        test_agent("min-weight-agent", seed, agent_func_dict["min-weight-agent"])
+        test_agent("sarsa agent", seed, agent_func_dict["sarsa agent"])
 
 
 if __name__ == '__main__':
+    log = logging.INFO
+    logging.basicConfig(format="%(asctime)s %(levelname)s:%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=log)
     test()
