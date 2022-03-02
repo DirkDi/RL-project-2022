@@ -194,7 +194,8 @@ def test_max_weight_large(seed: int = 3333, rand: bool = True):
     return cum_r, actions
 
 
-def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], seed: int = 1111, rand: bool = True, load: bool = False):
+def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], draw_map: bool, seed: int = 1111, rand: bool = True,
+                     load: bool = False):
     """
     Runs the SARSA agent on the environment of field 3 x 3
 
@@ -213,7 +214,8 @@ def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], seed: int = 1111, rand: 
 
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=3, width=3, packages=[(2, 2), (2, 0)])
-    # env.draw_map()
+    if draw_map:
+        env.draw_map()
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))
@@ -223,7 +225,8 @@ def test_sarsa_small(q: DefaultDict[Tuple, np.ndarray], seed: int = 1111, rand: 
     return cum_r, actions
 
 
-def test_sarsa_medium(q: DefaultDict[Tuple, np.ndarray], seed: int = 2222, rand: bool = True, load: bool = False):
+def test_sarsa_medium(q: DefaultDict[Tuple, np.ndarray], draw_map: bool,  seed: int = 2222, rand: bool = True,
+                      load: bool = False):
     """
     Runs the SARSA agent on the environment of field 5 x 5
 
@@ -242,7 +245,8 @@ def test_sarsa_medium(q: DefaultDict[Tuple, np.ndarray], seed: int = 2222, rand:
 
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))
@@ -252,7 +256,8 @@ def test_sarsa_medium(q: DefaultDict[Tuple, np.ndarray], seed: int = 2222, rand:
     return cum_r, actions
 
 
-def test_sarsa_large(q: DefaultDict[Tuple, np.ndarray], seed: int = 3333, rand: bool = True, load: bool = False):
+def test_sarsa_large(q: DefaultDict[Tuple, np.ndarray], draw_map: bool, seed: int = 3333, rand: bool = True,
+                     load: bool = False):
     """
     Runs the SARSA agent on the environment of field 10 x 10
 
@@ -271,7 +276,8 @@ def test_sarsa_large(q: DefaultDict[Tuple, np.ndarray], seed: int = 3333, rand: 
 
     set_seeds(seed)
     env = CityEnv(init_random=rand, height=10, width=10, packages=[(0, 2), (7, 2), (5, 5), (3, 8)])
-    env.draw_map()
+    if draw_map:
+        env.draw_map()
     if load:
         if q is None:
             q = defaultdict(lambda: np.zeros(env.action_space.n))
