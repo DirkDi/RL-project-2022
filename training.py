@@ -1,23 +1,10 @@
-import random
 import numpy as np
-import torch
 
 from typing import Tuple, List, DefaultDict
 
 from env import CityEnv
+from env_creator import create_small_env, create_medium_env, create_large_env
 from sarsa import sarsa, save_q
-
-
-def set_seeds(seed: int):
-    """
-    Set all random generators used to a specific seed
-
-    :param seed: an integer
-    """
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.use_deterministic_algorithms(True)
 
 
 def train_sarsa_small(num_episodes: int, seed: int = 1111,
@@ -36,10 +23,7 @@ def train_sarsa_small(num_episodes: int, seed: int = 1111,
     :return l: list of lengths of the episodes the agent trained
     :return q: Q table
     """
-    set_seeds(seed)
-    env = CityEnv(init_random=rand, height=3, width=3, packages=[(2, 2), (2, 0)])
-    if draw_map:
-        env.draw_map()
+    env = create_small_env(seed, rand, draw_map)
     r, l, q = sarsa(env, num_episodes)
     if save:
         file_name = f"q_sarsa_small_{seed}"
@@ -63,10 +47,7 @@ def train_sarsa_medium(num_episodes: int, seed: int = 2222,
     :return l: list of lengths of the episodes the agent trained
     :return q: Q table
     """
-    set_seeds(seed)
-    env = CityEnv(init_random=rand, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
-    if draw_map:
-        env.draw_map()
+    env = create_medium_env(seed, rand, draw_map)
     r, l, q = sarsa(env, num_episodes)
     if save:
         file_name = f"q_sarsa_medium_{seed}"
@@ -90,10 +71,7 @@ def train_sarsa_large(num_episodes: int, seed: int = 3333,
     :return l: list of lengths of the episodes the agent trained
     :return q: Q table
     """
-    set_seeds(seed)
-    env = CityEnv(init_random=rand, height=10, width=10, packages=[(0, 2), (7, 2), (5, 5), (3, 8)])
-    if draw_map:
-        env.draw_map()
+    env = create_large_env(seed, rand, draw_map)
     r, l, q = sarsa(env, num_episodes)
     if save:
         file_name = f"q_sarsa_large_{seed}"
@@ -103,23 +81,19 @@ def train_sarsa_large(num_episodes: int, seed: int = 3333,
 
 def train():
     """
-    Trains the SARSA agents and saves the Q tables.
+    Trains SARSA agents for different environments (3x3, 5x5, 10x10) and saves the Q tables.
     """
     seeds = [1111, 2222, 3333]
-
-    # Train on the small field (3 x 3)
     num_episodes_small = 10000
-    for seed in seeds:
-        train_sarsa_small(num_episodes_small, seed, save=True)
-
-    # Train on the medium field (5 x 5)
     num_episodes_medium = 100000
-    for seed in seeds:
-        train_sarsa_medium(num_episodes_medium, seed, save=True)
-
-    # Train on the large field (10 x 10)
     num_episodes_large = 1000000
+    # train environments with different seeds
     for seed in seeds:
+        # Train on the small field (3 x 3)
+        train_sarsa_small(num_episodes_small, seed, save=True)
+        # Train on the medium field (5 x 5)
+        train_sarsa_medium(num_episodes_medium, seed, save=True)
+        # Train on the large field (10 x 10)
         train_sarsa_small(num_episodes_large, seed, save=True)
 
 
