@@ -36,12 +36,11 @@ class CityEnv(gym.Env):
                                 min_traffic, max_traffic, num_packages]) > 0), "all arguments must be non-negative!"
         assert min_distance < max_distance and min_traffic < max_traffic, \
             "minimum values have to be lower than maximum values!"
-        """
-        if any(value <= 0 for value in [height, width, min_distance, max_distance, min_traffic, max_traffic,
-                                        num_packages]) or max_distance < min_distance or max_traffic < min_traffic:
-            logging.error('Environment out of range.')
-            sys.exit(1)
-        """
+        if dist_matrix is not None:
+            assert np.all(dist_matrix >= 0), "all entries in the distance matrix must not be non-negative!"
+        if traffic_matrix is not None:
+            assert np.all(traffic_matrix >= 0), "all entries in the traffic matrix must not be non-negative!"
+
         self.height = height
         self.width = width
         self.min_distance = min_distance  # minimum distance between vertices
