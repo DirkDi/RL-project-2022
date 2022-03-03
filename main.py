@@ -3,7 +3,6 @@ import random
 import argparse
 import numpy as np
 from pathlib import Path
-import logging
 from sarsa import load_q
 from test import test_random_small, test_random_medium, test_random_large, \
     test_min_weight_small, test_min_weight_medium, test_min_weight_large, \
@@ -11,7 +10,6 @@ from test import test_random_small, test_random_medium, test_random_large, \
     test_sarsa_small, test_sarsa_medium, test_sarsa_large
 from training import train_sarsa_small, train_sarsa_medium, train_sarsa_large
 from env import CityEnv
-from experimental.CityEnv import CityEnv as Env
 from sb_agents import *
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.env_checker import check_env
@@ -39,58 +37,6 @@ def set_seeds(seed):
     torch.use_deterministic_algorithms(True)
 
 
-def test():
-    """
-    To experiment with some things
-    """
-    """
-    NOTE: Important!
-        Indexing scheme: row entry := start vertex
-                     column entry := target vertex
-    """
-    dist_matrix = np.array([
-        [0, 20, 0, 1, 0, 0, 0, 0, 0],
-        [20, 0, 1, 0, 1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 20, 0, 0, 0],
-        [1, 0, 0, 0, 1, 0, 1, 0, 0],
-        [0, 1, 0, 1, 0, 1, 0, 1, 0],
-        [0, 0, 20, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 1, 0],
-        [0, 0, 0, 0, 1, 0, 1, 0, 1],
-        [0, 0, 0, 0, 0, 20, 0, 1, 0]
-    ])
-
-    dist_matrix = np.array([
-        [0, 113, 0, 92, 0, 0, 0, 0, 0],
-        [113, 0, 43, 0, 139, 0, 0, 0, 0],
-        [0, 43, 0, 0, 0, 17, 0, 0, 0],
-        [92, 0, 0, 0, 0, 0, 130, 0, 0],
-        [0, 139, 0, 0, 0, 23, 0, 0, 0],
-        [0, 0, 0, 0, 23, 0, 0, 0, 77],
-        [0, 0, 0, 130, 0, 0, 0, 123, 0],
-        [0, 0, 0, 0, 126, 0, 123, 0, 141],
-        [0, 0, 0, 0, 0, 77, 0, 141, 0]
-    ])
-
-    env = Env(height=3, width=3, packages=[(0, 2), (2, 2)], dist_matrix=dist_matrix, traffic_lights=[(1, 0), (0, 1)])
-    env.reset()
-    # hyper_parameter_grid_search(env)
-    # logging.info(env.packages)
-    # env.draw_map()
-    env.close()
-    return 0, []
-
-    r, l, Q = sarsa(env, 25000)
-
-    pi = np.zeros((3, env.height, env.width))
-    for (x, y, c), actions in Q.items():
-        pi[c, x, y] = np.argmax(actions)
-    logging.debug(pi)
-
-    cum_r, actions = evaluate_sarsa_policy(Q, env)
-    return cum_r, actions
-
-
 def main():
     args = argsparser()
     # use logging to get prints for debug/info/error mode
@@ -107,7 +53,7 @@ def main():
     seeds = args.seed
     show_graph = args.graph
     if mode == 'normal':
-        episodes = [10000, 10000, 10000]
+        episodes = [100000, 100000, 1000000]
         average_reward_s = 0
         average_reward_m = 0
         average_reward_l = 0
@@ -180,7 +126,7 @@ def main():
             logging.info(f'The optimal action sequence is {actions}')
             average_reward_s += cum_r
 
-            cum_r, actions = test_max_weight_medium(seed)
+            cum_r, actions = test_min_weight_medium(seed)
             logging.info(f'Results for 5x5 grid:')
             logging.info(f'The cummulative reward is {cum_r}')
             logging.info(f'The optimal action sequence is {actions}')

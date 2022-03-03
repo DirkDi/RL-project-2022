@@ -52,6 +52,8 @@ class CityEnv(gym.Env):
                    (matrix_height == traffic_matrix.shape[0]) and (matrix_height == traffic_matrix.shape[1]), \
                    "given height and width do not match distance matrix length!"
 
+        self.CO2 = 0.142    # constant for co2 emission per meter
+        self.PENALTY = -100  # reward penalty for illegal action
         self.height = height
         self.width = width
 
@@ -190,7 +192,7 @@ class CityEnv(gym.Env):
                 dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
                 reward = 1 / dist_to_next_package
             """
-            reward = -1000  # -10000 * (self.height * self.width)
+            reward = self.PENALTY
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.int32), reward, False, {
                 'render.modes': ['console']}
         start_vertex = self.vertices_matrix[pos_x, pos_y]
@@ -199,7 +201,7 @@ class CityEnv(gym.Env):
         traffic_flow = self.traffic_matrix[target_vertex, start_vertex]
         # action is not allowed if there is no vertex between both points (value is 0 for dist & traffic_flow)
         if not dist:
-            reward = -1000  # -10000 * (self.height * self.width)
+            reward = self.PENALTY
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.int32), reward, False, {
                 'render.modes': ['console']}
         self.pos = new_pos_x, new_pos_y
@@ -216,7 +218,7 @@ class CityEnv(gym.Env):
         meta_info = {'render.modes': ['console']}
         self.already_driven.append((new_pos_x, new_pos_y))
         # logging.debug(self.already_driven)
-        return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.int32), reward, done, meta_info
+        return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.int32), reward * self.CO2, done, meta_info
 
     def close(self):
         """
