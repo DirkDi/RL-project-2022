@@ -53,7 +53,7 @@ def main():
     seeds = args.seed
     show_graph = args.graph
     if mode == 'normal':
-        episodes = [100000, 100000, 1000000]
+        episodes = [1000000, 1000000, 1000000]
         average_reward_s = 0
         average_reward_m = 0
         average_reward_l = 0
