@@ -42,16 +42,18 @@ class CityEnv(gym.Env):
         if dist_matrix is not None and traffic_matrix is not None:
             # check if distance and traffic matrix have the same dimension
             assert dist_matrix.shape == traffic_matrix.shape, \
-                "traffic and distance matrix need to have the same dimension!"
+                f"traffic and distance matrix need to have the same dimension!"
             # check if distance and traffic matrix have the same edges
             dist_idx = np.argwhere(dist_matrix > 0)
             traffic_idx = np.argwhere(traffic_matrix > 0)
             assert np.array_equal(dist_idx, traffic_idx), "traffic and distance matrix need to have the same edges!"
-            self.height = dist_matrix.shape[0]
-            self.width = dist_matrix.shape[1]
-        else:
-            self.height = height
-            self.width = width
+            matrix_height = height * width
+            assert (matrix_height == dist_matrix.shape[0]) and (matrix_height == dist_matrix.shape[1]) and \
+                   (matrix_height == traffic_matrix.shape[0]) and (matrix_height == traffic_matrix.shape[1]), \
+                   "given height and width do not match distance matrix length!"
+
+        self.height = height
+        self.width = width
 
         self.min_distance = min_distance  # minimum distance between vertices
         self.max_distance = max_distance  # maximum distance between vertices
@@ -100,7 +102,7 @@ class CityEnv(gym.Env):
         # Check if city graph is connected
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
-                assert self.validate_accessibility(i, j), "The city graph is not connected!"
+                assert self.validate_accessibility(i, j), f"{self.matrix_height} The city graph is not for nodes {i} and {j} connected!"
 
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
@@ -114,13 +116,11 @@ class CityEnv(gym.Env):
         self.traffic_lights = []  # list of coordinates with traffic lights
 
         if packages is None:
+            assert init_random, "If no packages are defined, init_random must be set to True!"
             packages = []
             self.num_packages = num_packages
-            if init_random:
-                for i in range(num_packages):
-                    packages.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
-            else:
-                packages.append((2, 1))
+            for i in range(num_packages):
+                packages.append((random.randint(0, self.height - 1), random.randint(0, self.width - 1)))
         else:
             self.num_packages = len(packages)
         self.packages = packages.copy()

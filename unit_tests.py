@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 from env import CityEnv
+from sarsa import sarsa, save_q, load_q
+from env_creator import set_seeds
 
 
 class Test(unittest.TestCase):
@@ -12,8 +14,9 @@ class Test(unittest.TestCase):
         """
         Checks if the creation of the environment is allowed or not and if parameters work correctly.
         """
+
         # check if assertion is raised if one of the variables "height", "width", "min_distance", "max_distance",
-        #                                 "min_traffic", "max_traffic", "num_packages" is <= 0.
+        #                                 "min_traffic", "max_traffic", "num_packages" is lower equals 0.
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=-1, one_way=False,
                     construction_sites=False, traffic_lights=False)
@@ -41,6 +44,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=3, num_packages=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
+
         # check if assertion is raised if "max_distance" is < "min_distance" or "max_traffic" < "min_traffic".
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=3, min_distance=5, max_distance=4, one_way=False,
@@ -48,6 +52,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=3, min_traffic=5, max_traffic=4, one_way=False,
                     construction_sites=False, traffic_lights=False)
+
         # check if assertion is raised if "distance_matrix" or "traffic_matrix" contains negative values.
         neg_dist = np.array([
             [0, 1, 0, 0],
@@ -82,33 +87,64 @@ class Test(unittest.TestCase):
         with self.assertRaises(AssertionError):
             CityEnv(height=2, width=2, dist_matrix=pos_dist, traffic_matrix=neg_traffic, one_way=False,
                     construction_sites=False, traffic_lights=False)
+
+        # check cases whether distance or traffic matrix or both are zeros
+        dist2 = np.zeros((9, 9))
+        traffic2 = np.ones((9, 9))
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, dist_matrix=dist2, traffic_matrix=traffic2, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        dist3 = np.ones((9, 9))
+        traffic3 = np.zeros((9, 9))
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, dist_matrix=dist3, traffic_matrix=traffic3, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+        dist4 = np.zeros((9, 9))
+        traffic4 = np.zeros((9, 9))
+        with self.assertRaises(AssertionError):
+            CityEnv(height=3, width=3, dist_matrix=dist4, traffic_matrix=traffic4, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+
         # check if assertion is raised if "dist_matrix" and "traffic_matrix" have not the same dimension
         with self.assertRaises(AssertionError):
             dist = np.ones((2, 2))
             traffic = np.ones((3, 3))
-            CityEnv(dist_matrix=dist, traffic_matrix=traffic, one_way=False,
+            CityEnv(height=2, width=2, dist_matrix=dist, traffic_matrix=traffic, one_way=False,
                     construction_sites=False, traffic_lights=False)
+
         # check if assertion is raised if "dist_matrix" and "traffic_matrix" have not the same edges
         with self.assertRaises(AssertionError):
-            dist = np.ones((2, 2))
-            traffic = np.zeros((2, 2))
-            CityEnv(dist_matrix=dist, traffic_matrix=traffic, one_way=False,
+            dist = np.array([
+                [0, 1, 1, 0],
+                [1, 0, 0, 1],
+                [1, 0, 0, 1],
+                [0, 1, 1, 0]
+            ])
+            traffic = np.array([
+                [0, 1, 1, 0],
+                [1, 0, 0, 1],
+                [0, 0, 0, 1],
+                [0, 1, 1, 0]
+            ])
+            CityEnv(height=2, width=2, dist_matrix=dist, traffic_matrix=traffic, one_way=False,
                     construction_sites=False, traffic_lights=False)
+
         # check if "height" and "width" values are correct after initialization
-        env = CityEnv(height=2, width=2, one_way=False,
+        env = CityEnv(height=2, width=2, one_way=False, init_random=True,
                       construction_sites=False, traffic_lights=False)
         self.assertEqual((env.height, env.width), (2, 2))
-        env = CityEnv(height=5, width=5, one_way=False,
+        env = CityEnv(height=5, width=5, one_way=False, init_random=True,
                       construction_sites=False, traffic_lights=False)
         self.assertEqual((env.height, env.width), (5, 5))
-        env = CityEnv(one_way=False,
+        env = CityEnv(one_way=False, init_random=True,
                       construction_sites=False, traffic_lights=False)
         self.assertEqual((env.height, env.width), (3, 3))
-        dist = np.ones((3, 3))
-        traffic = np.ones((3, 3))
-        env = CityEnv(height=1, width=1, dist_matrix=dist, traffic_matrix=traffic, one_way=False,
-                      construction_sites=False, traffic_lights=False)
-        self.assertEqual((env.height, env.width), (3, 3))
+        dist = np.ones((4, 4))
+        traffic = np.ones((4, 4))
+        env = CityEnv(height=2, width=2, dist_matrix=dist, traffic_matrix=traffic, one_way=False,
+                      construction_sites=False, traffic_lights=False, init_random=True)
+        self.assertEqual((env.height, env.width), (2, 2))
+
         # check if the variable "num_packages" is correct after giving default packages
         env = CityEnv(height=3, width=3, packages=[(0, 1), (1, 0), (1, 1), (2, 0)], one_way=False,
                       construction_sites=False, traffic_lights=False)
@@ -122,14 +158,33 @@ class Test(unittest.TestCase):
                       construction_sites=False, traffic_lights=False)
         self.assertEqual(env.num_packages, 2)
         self.assertEqual(len(env.packages), 2)
-        env = CityEnv(height=3, width=3, num_packages=4, packages=[], one_way=False,
-                      construction_sites=False, traffic_lights=False)
-        self.assertEqual(env.num_packages, 4)
-        self.assertEqual(len(env.packages), 4)
-        env = CityEnv(height=3, width=3, one_way=False,
+        with self.assertRaises(AssertionError):
+            # error since random must be set to True if no packages are given
+            CityEnv(height=3, width=3, num_packages=4, one_way=False,
+                    construction_sites=False, traffic_lights=False)
+
+        env = CityEnv(height=3, width=3, one_way=False, init_random=True,
                       construction_sites=False, traffic_lights=False)
         self.assertEqual(env.num_packages, 2)
         self.assertEqual(len(env.packages), 2)
+
+        # check random generated environments using seeds
+        set_seeds(1111)
+        env1 = CityEnv(height=2, width=2, init_random=True)
+        dist1 = env1.dist_matrix
+        traffic1 = env1.traffic_matrix
+        set_seeds(2222)
+        env2 = CityEnv(height=2, width=2, init_random=True)
+        dist2 = env2.dist_matrix
+        traffic2 = env2.traffic_matrix
+        self.assertFalse(np.array_equal(dist1, dist2))
+        self.assertFalse(np.array_equal(traffic1, traffic2))
+        set_seeds(1111)
+        env3 = CityEnv(height=2, width=2, init_random=True)
+        dist3 = env3.dist_matrix
+        traffic3 = env3.traffic_matrix
+        self.assertTrue(np.array_equal(dist3, dist1))
+        self.assertTrue(np.array_equal(traffic3, traffic3))
 
     def test_validate_accessibility(self):
         """
@@ -149,7 +204,8 @@ class Test(unittest.TestCase):
             [0, 1, 0, 0]
         ])
 
-        env = CityEnv(height=2, width=2, one_way=False, construction_sites=False, traffic_lights=False)
+        env = CityEnv(height=2, width=2, one_way=False, construction_sites=False,
+                      traffic_lights=False, init_random=True)
         env.dist_matrix = dist1
         # check for direct paths
         self.assertTrue(env.validate_accessibility(0, 0))  # start and end is the same so there always accessibility
@@ -179,37 +235,15 @@ class Test(unittest.TestCase):
         traffic1 = np.ones((9, 9)) * 1.5
         correct_map1 = np.ones((9, 9)) * 15
         env1 = CityEnv(height=3, width=3, dist_matrix=dist1, traffic_matrix=traffic1, one_way=False,
-                       construction_sites=False, traffic_lights=False)
-        dist2 = np.zeros((9, 9))
-        traffic2 = np.ones((9, 9))
-        correct_map2 = np.zeros((9, 9))
-        env2 = CityEnv(height=3, width=3, dist_matrix=dist2, traffic_matrix=traffic2, one_way=False,
-                       construction_sites=False, traffic_lights=False)
-        dist3 = np.ones((9, 9))
-        traffic3 = np.zeros((9, 9))
-        correct_map3 = np.zeros((9, 9))
-        env3 = CityEnv(height=3, width=3, dist_matrix=dist3, traffic_matrix=traffic3, one_way=False,
-                       construction_sites=False, traffic_lights=False)
-        dist4 = np.zeros((9, 9))
-        traffic4 = np.zeros((9, 9))
-        correct_map4 = np.zeros((9, 9))
-        env4 = CityEnv(height=3, width=3, dist_matrix=dist4, traffic_matrix=traffic4, one_way=False,
-                       construction_sites=False, traffic_lights=False)
-        # test the environments
-        self.assertEqual(env1.weighted_map, correct_map1)
-        self.assertEqual(env1.get_map(), correct_map1)
-        self.assertEqual(env2.weighted_map, correct_map2)
-        self.assertEqual(env2.get_map(), correct_map2)
-        self.assertEqual(env3.weighted_map, correct_map3)
-        self.assertEqual(env3.get_map(), correct_map3)
-        self.assertEqual(env4.weighted_map, correct_map4)
-        self.assertEqual(env4.get_map(), correct_map4)
+                       construction_sites=False, traffic_lights=False, init_random=True)
+        self.assertTrue(np.array_equal(env1.weighted_map, correct_map1))
+        self.assertTrue(np.array_equal(env1.get_map(), correct_map1))
 
     def test_reset_environment(self):
         """
         Checks if the reset of the environment works correctly.
         """
-        env = CityEnv(height=3, width=3, num_packages=4, one_way=False,
+        env = CityEnv(height=3, width=3, num_packages=4, one_way=False, init_random=True,
                       construction_sites=False, traffic_lights=False)
         # get old packages to see if reset can load them.
         old_packages = env.packages.copy()
@@ -288,11 +322,10 @@ class Test(unittest.TestCase):
         """
         Checks if the maximum weight/emission baseline works correct.
         """
-        # TODO: think about tests (test one step, test all steps)
         dist = np.array([
-            [0, 1, 100, 0],
-            [1, 0, 0, 1],
-            [100, 0, 0, 1],
+            [0, 5, 5, 0],
+            [5.1, 0, 0, 1],
+            [5, 0, 0, 1],
             [0, 1, 1, 0]
         ])
         traffic = np.array([
@@ -301,21 +334,22 @@ class Test(unittest.TestCase):
             [1, 0, 0, 1],
             [0, 1, 1, 0]
         ])
-        env = CityEnv(dist_matrix=dist, traffic_matrix=traffic, packages=[(1, 0)],
+        env = CityEnv(height=2, width=2, dist_matrix=dist, traffic_matrix=traffic, packages=[(1, 0)],
                       one_way=False, construction_sites=False, traffic_lights=False)
         env.init_pos = 0, 0
         env.reset()
+        self.assertEqual(env.get_max_emission_action(), 3)
+        env.traffic_lights = [(1, 0)]
         self.assertEqual(env.get_max_emission_action(), 1)
 
     def test_get_min_emission_action(self):
         """
         Checks if the minimum weight/emission baseline works correct.
         """
-        # TODO: think about tests (test one step, test all steps)
         dist = np.array([
-            [0, 1, 100, 0],
-            [1, 0, 0, 1],
-            [100, 0, 0, 1],
+            [0, 5, 5, 0],
+            [5.1, 0, 0, 1],
+            [5, 0, 0, 1],
             [0, 1, 1, 0]
         ])
         traffic = np.array([
@@ -324,10 +358,12 @@ class Test(unittest.TestCase):
             [1, 0, 0, 1],
             [0, 1, 1, 0]
         ])
-        env = CityEnv(dist_matrix=dist, traffic_matrix=traffic, packages=[(1, 0)],
+        env = CityEnv(height=2, width=2, dist_matrix=dist, traffic_matrix=traffic, packages=[(1, 0)],
                       one_way=False, construction_sites=False, traffic_lights=False)
         env.init_pos = 0, 0
         env.reset()
+        self.assertEqual(env.get_min_emission_action(), 1)
+        env.traffic_lights = [(1, 0)]
         self.assertEqual(env.get_min_emission_action(), 3)
 
     def test_stored_sarsa(self):
@@ -335,4 +371,18 @@ class Test(unittest.TestCase):
         Checks if storing and loading of trained sarsa agent is correct.
         """
         # TODO: think about tests
-        pass
+        env = CityEnv(height=2, width=2, packages=[(1, 1)],
+                      one_way=False, construction_sites=False, traffic_lights=False)
+        env.init_pos = 0, 0
+        r, l, q = sarsa(env, 10)
+        save_q(q, "q_sarsa_save_load_test")
+        loaded_q = load_q(q.copy(), "q_sarsa_save_load_test")
+        list1 = list(sorted(q.items()))
+        list2 = list(sorted(loaded_q.items()))
+        for (key1, value1), (key2, value2) in zip(list1, list2):
+            self.assertEqual(key1, key2)
+            self.assertTrue(np.array_equal(value1, value2))
+
+
+if __name__ == '__main__':
+    unittest.main()

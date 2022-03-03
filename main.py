@@ -144,44 +144,83 @@ def main():
         logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
         logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
     elif mode == 'random':
-        cum_r, actions = test_random_small()
-        logging.info(f'Results for 3x3 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
-        cum_r, actions = test_random_medium()
-        logging.info(f'Results for 5x5 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
-        cum_r, actions = test_random_large()
-        logging.info(f'Results for 10x10 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
+        average_reward_s = 0
+        average_reward_m = 0
+        average_reward_l = 0
+        for seed in seeds:
+            cum_r, actions = test_random_small(seed)
+            logging.info(f'Results for 3x3 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_s += cum_r
+
+            cum_r, actions = test_random_medium(seed)
+            logging.info(f'Results for 5x5 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_m += cum_r
+
+            cum_r, actions = test_random_large(seed)
+            logging.info(f'Results for 10x10 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_l += cum_r
+        logging.info(f'Average rewards:')
+        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
+        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
+        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
     elif mode == 'min_weight':
-        cum_r, actions = test_min_weight_small()
-        logging.info(f'Results for 3x3 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
-        cum_r, actions = test_max_weight_medium()
-        logging.info(f'Results for 5x5 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
-        cum_r, actions = test_min_weight_large()
-        logging.info(f'Results for 10x10 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
+        average_reward_s = 0
+        average_reward_m = 0
+        average_reward_l = 0
+        for seed in seeds:
+            cum_r, actions = test_min_weight_small(seed)
+            logging.info(f'Results for 3x3 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_s += cum_r
+
+            cum_r, actions = test_max_weight_medium(seed)
+            logging.info(f'Results for 5x5 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_m += cum_r
+
+            cum_r, actions = test_min_weight_large(seed)
+            logging.info(f'Results for 10x10 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_l += cum_r
+        logging.info(f'Average rewards:')
+        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
+        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
+        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
     elif mode == 'max_weight':
-        cum_r, actions = test_max_weight_small()
-        logging.info(f'Results for 3x3 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
-        cum_r, actions = test_max_weight_medium()
-        logging.info(f'Results for 5x5 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
-        cum_r, actions = test_max_weight_large()
-        logging.info(f'Results for 10x10 grid:')
-        logging.info(f'The cummulative reward is {cum_r}')
-        logging.info(f'The optimal action sequence is {actions}')
+        average_reward_s = 0
+        average_reward_m = 0
+        average_reward_l = 0
+        for seed in seeds:
+            cum_r, actions = test_max_weight_small(seed)
+            logging.info(f'Results for 3x3 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_s += cum_r
+
+            cum_r, actions = test_max_weight_medium(seed)
+            logging.info(f'Results for 5x5 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_m += cum_r
+
+            cum_r, actions = test_max_weight_large(seed)
+            logging.info(f'Results for 10x10 grid:')
+            logging.info(f'The cummulative reward is {cum_r}')
+            logging.info(f'The optimal action sequence is {actions}')
+            average_reward_l += cum_r
+        logging.info(f'Average rewards:')
+        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
+        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
+        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
     elif mode == 'a2c':  # not used above 3x3 grid size (no useful policy)
         env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 0), (2, 2)])
         env.draw_map()
