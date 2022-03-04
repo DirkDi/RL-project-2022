@@ -25,6 +25,7 @@ def train_sarsa_small(num_episodes: int, seed: int = 1111,
     """
     env = create_small_env(seed, rand, draw_map)
     r, l, q = sarsa(env, num_episodes)
+    print("sarsa done")
     if save:
         file_name = f"q_sarsa_small_{seed}"
         save_q(q, file_name)

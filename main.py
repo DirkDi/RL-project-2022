@@ -10,12 +10,18 @@ from test import test_random_small, test_random_medium, test_random_large, \
     test_sarsa_small, test_sarsa_medium, test_sarsa_large
 from training import train_sarsa_small, train_sarsa_medium, train_sarsa_large
 from env import CityEnv
+from env_creator import *
 from sb_agents import *
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.env_checker import check_env
 
 
-def argsparser():
+def args_parser():
+    """
+    Creates an argument parser to choose between several options.
+
+    :return: created argument parser
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true", help="debug output")
     parser.add_argument('--mode', '-m', type=str, default='normal',
@@ -30,15 +36,51 @@ def argsparser():
     return args
 
 
-def set_seeds(seed):
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.manual_seed(seed)
-    torch.use_deterministic_algorithms(True)
+def show_result(grid_name, cum_r, actions):
+    """
+    Shows the cumulative reward and action sequence results of an agent for a specific grid
+
+    :param grid_name: the name of the grid
+    :param cum_r: the cumulative reward
+    :param actions: the chosen action sequence
+    """
+    logging.info(f'Results for {grid_name}:')
+    logging.info(f'The cumulative reward is {cum_r}')
+    logging.info(f'The optimal action sequence is {actions}')
+
+
+def show_average_results(agent_name, reward_s, reward_m, reward_l):
+    """
+    Shows the average reward values for the small environment (3x3), medium environment (5x5) and large one (10x10)
+    :param agent_name: the name of the used agent
+    :param reward_s: the reward list of the small environment over all seeds
+    :param reward_m: the reward list of the medium environment over all seeds
+    :param reward_l: the reward list of the large environment over all seeds
+    """
+    # get amount of specific environment rewards
+    len_small = len(reward_s)
+    len_medium = len(reward_m)
+    len_large = len(reward_l)
+    # get standard deviation of rewards for specific environment sizes
+    std_s = round(np.std(reward_s), 2)
+    std_m = round(np.std(reward_m), 2)
+    std_l = round(np.std(reward_l), 2)
+    # get average reward for specific environment size
+    average_reward_s = round(sum(reward_s) / len_small, 2) if len_small else 0.00
+    average_reward_m = round(sum(reward_m) / len_medium, 2) if len_medium else 0.00
+    average_reward_l = round(sum(reward_l) / len_large, 2) if len_medium else 0.00
+    # show the results
+    logging.info(f'Average rewards for {agent_name}:')
+    logging.info(f'Average reward for 3x3 with {len_small} seeds is {average_reward_s} (-/+ {std_s})')
+    logging.info(f'Average reward for 5x5 with {len_medium} seeds is {average_reward_m} (-/+ {std_m})')
+    logging.info(f'Average reward for 10x10 with {len_large} seeds is {average_reward_l} (-/+ {std_l})')
 
 
 def main():
-    args = argsparser()
+    """
+    Performs training and testing with different seeds and environments for a chosen agent.
+    """
+    args = args_parser()
     # use logging to get prints for debug/info/error mode
     log = logging.INFO
     if args.debug:
@@ -52,148 +94,99 @@ def main():
 
     seeds = args.seed
     show_graph = args.graph
+    average_reward_s = []
+    average_reward_m = []
+    average_reward_l = []
     if mode == 'normal':
-        episodes = [1000000, 1000000, 1000000]
-        average_reward_s = 0
-        average_reward_m = 0
-        average_reward_l = 0
+        episodes = [100000, 100000, 250000]
         for seed in seeds:
             num_episodes = episodes[0]
             if not Path(f"q_sarsa_small_{seed}.csv").is_file():
                 train_sarsa_small(num_episodes, seed, save=True)
-            cum_r, actions = test_sarsa_small(q=None, seed=seed, load=True, draw_map=show_graph)
-            average_reward_s += cum_r
-            logging.info(f'Results for 3x3 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
+            cum_r, actions = test_sarsa_small(q=None, seed=seed, load=True, draw_map=True)
+            average_reward_s.append(cum_r)
+            show_result("3x3 grid", cum_r, actions)
 
             num_episodes = episodes[1]
             if not Path(f"q_sarsa_medium_{seed}.csv").is_file():
                 train_sarsa_medium(num_episodes, seed, save=True)
-            cum_r, actions = test_sarsa_medium(q=None, seed=seed, load=True, draw_map=show_graph)
-            average_reward_m += cum_r
-            logging.info(f'Results for 5x5 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
+            cum_r, actions = test_sarsa_medium(q=None, seed=seed, load=True, draw_map=True)
+            average_reward_m.append(cum_r)
+            show_result("5x5 grid", cum_r, actions)
 
             num_episodes = episodes[2]
             if not Path(f"q_sarsa_large_{seed}.csv").is_file():
                 train_sarsa_large(num_episodes, seed, save=True)
             cum_r, actions = test_sarsa_large(q=None, seed=seed, load=True, draw_map=show_graph)
-            average_reward_l += cum_r
-            logging.info(f'Results for 10x10 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-
-        logging.info(f'Average rewards:')
-        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
-        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
-        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
+            average_reward_l.append(cum_r)
+            show_result("10x10 grid", cum_r, actions)
+        show_average_results("SARSA", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'random':
-        average_reward_s = 0
-        average_reward_m = 0
-        average_reward_l = 0
         for seed in seeds:
+            # calculate small environment and store value
             cum_r, actions = test_random_small(seed)
-            logging.info(f'Results for 3x3 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-            average_reward_s += cum_r
-
+            show_result("3x3 grid", cum_r, actions)
+            average_reward_s.append(cum_r)
+            # calculate medium environment and store value
             cum_r, actions = test_random_medium(seed)
-            logging.info(f'Results for 5x5 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-            average_reward_m += cum_r
-
+            show_result("5x5 grid", cum_r, actions)
+            average_reward_m.append(cum_r)
+            # calculate large environment and store value
             cum_r, actions = test_random_large(seed)
-            logging.info(f'Results for 10x10 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-            average_reward_l += cum_r
-        logging.info(f'Average rewards:')
-        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
-        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
-        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
+            show_result("10x10 grid", cum_r, actions)
+            average_reward_l.append(cum_r)
+        show_average_results("random", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'min_weight':
-        average_reward_s = 0
-        average_reward_m = 0
-        average_reward_l = 0
         for seed in seeds:
+            # calculate small environment and store value
             cum_r, actions = test_min_weight_small(seed)
-            logging.info(f'Results for 3x3 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-            average_reward_s += cum_r
-
+            show_result("3x3 grid", cum_r, actions)
+            average_reward_s.append(cum_r)
+            # calculate medium environment and store value
             cum_r, actions = test_min_weight_medium(seed)
-            logging.info(f'Results for 5x5 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-            average_reward_m += cum_r
-
+            show_result("5x5 grid", cum_r, actions)
+            average_reward_m.append(cum_r)
+            # calculate large environment and store value
             cum_r, actions = test_min_weight_large(seed)
-            logging.info(f'Results for 10x10 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
-            average_reward_l += cum_r
-        logging.info(f'Average rewards:')
-        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
-        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
-        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
+            show_result("10x10 grid", cum_r, actions)
+            average_reward_l.append(cum_r)
+        show_average_results("minimum weight agent", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'max_weight':
-        average_reward_s = 0
-        average_reward_m = 0
-        average_reward_l = 0
         for seed in seeds:
+            # calculate small environment and store value
             cum_r, actions = test_max_weight_small(seed)
-            logging.info(f'Results for 3x3 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
+            show_result("3x3 grid", cum_r, actions)
             average_reward_s += cum_r
-
+            # calculate medium environment and store value
             cum_r, actions = test_max_weight_medium(seed)
-            logging.info(f'Results for 5x5 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
+            show_result("5x5 grid", cum_r, actions)
             average_reward_m += cum_r
-
+            # calculate large environment and store value
             cum_r, actions = test_max_weight_large(seed)
-            logging.info(f'Results for 10x10 grid:')
-            logging.info(f'The cummulative reward is {cum_r}')
-            logging.info(f'The optimal action sequence is {actions}')
+            show_result("10x10 grid", cum_r, actions)
             average_reward_l += cum_r
-        logging.info(f'Average rewards:')
-        logging.info(f'Average reward for 3x3 with {len(seeds)} seeds is {average_reward_s / len(seeds)}')
-        logging.info(f'Average reward for 5x5 with {len(seeds)} seeds is {average_reward_m / len(seeds)}')
-        logging.info(f'Average reward for 10x10 with {len(seeds)} seeds is {average_reward_l / len(seeds)}')
-    elif mode == 'a2c':  # not used above 3x3 grid size (no useful policy)
-        env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 0), (2, 2)])
-        env.draw_map()
-        check_env(env, warn=True)
-        model = a2c_agent(env, total_timesteps=1000000, log_interval=100)
-        logging.info("training done")
-        cum_r, actions = run_agent(env, model)
-    elif mode == 'ppo':  # not used above 3x3 grid size (no useful policy)
-        env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(0, 4), (2, 0), (4, 2)])
-        env.draw_map()
-        # check_env(env, warn=True)
-        model = ppo_agent(env, total_timesteps=1000000)
-        logging.info("training done")
-        cum_r, actions = run_agent(env, model)
+        show_average_results("maximum weight agent", average_reward_s, average_reward_m, average_reward_l)
+    elif mode == 'a2c':  # not worked above 3x3 grid size (no useful policy)
+        for seed in seeds:
+            env = create_small_env(seed, True, show_graph)
+            check_env(env, warn=True)
+            model = a2c_agent(env, total_timesteps=1000000, log_interval=100)
+            cum_r, actions = run_agent(env, model)
+            show_result("3x3 grid", cum_r, actions)
+    elif mode == 'ppo':  # not worked above 3x3 grid size (no useful policy)
+        for seed in seeds:
+            env = create_small_env(seed, True, show_graph)
+            check_env(env, warn=True)
+            model = ppo_agent(env, total_timesteps=100000)
+            cum_r, actions = run_agent(env, model)
+            show_result("3x3 grid", cum_r, actions)
     elif mode == 'dqn':  # no useful policy
-        env = CityEnv(init_random=not args.static, height=3, width=3, packages=[(2, 2)])
-        check_env(env, warn=True)
-        model = dqn_agent(env)
-        logging.info("training done")
-        cum_r, actions = run_agent(env, model)
-    else:
-        # cum_r, actions = test()
-        env = CityEnv(init_random=not args.static, height=5, width=5, packages=[(2, 2), (2, 0)],
-                      one_way=not args.bidirectional, construction_sites=not args.interconnected,
-                      traffic_lights=not args.notrafficlights)
-        # hyper_parameter_grid_search(env)
-        cum_r, actions = 0, []
+        for seed in seeds:
+            env = create_small_env(seed, True, show_graph)
+            check_env(env, warn=True)
+            model = dqn_agent(env, total_timesteps=100000)
+            cum_r, actions = run_agent(env, model)
+            show_result("3x3 grid", cum_r, actions)
 
 
 if __name__ == '__main__':

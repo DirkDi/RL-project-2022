@@ -14,7 +14,6 @@ class Test(unittest.TestCase):
         """
         Checks if the creation of the environment is allowed or not and if parameters work correctly.
         """
-
         # check if assertion is raised if one of the variables "height", "width", "min_distance", "max_distance",
         #                                 "min_traffic", "max_traffic", "num_packages" is lower equals 0.
         with self.assertRaises(AssertionError):
@@ -370,7 +369,6 @@ class Test(unittest.TestCase):
         """
         Checks if storing and loading of trained sarsa agent is correct.
         """
-        # TODO: think about tests
         env = CityEnv(height=2, width=2, packages=[(1, 1)],
                       one_way=False, construction_sites=False, traffic_lights=False)
         env.init_pos = 0, 0

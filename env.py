@@ -21,11 +21,28 @@ class CityEnv(gym.Env):
     def __init__(self, height=3, width=3, min_distance=10, max_distance=100, min_traffic=1, max_traffic=2,
                  dist_matrix: np.ndarray = None,
                  traffic_matrix: np.ndarray = None,
-                 packages=None, num_packages: int = 2,
+                 traffic_lights_list: list = None,
+                 init_pos: tuple = None, packages=None, num_packages: int = 2,
                  init_random=False, one_way=True, construction_sites=True,
                  traffic_lights=True):
         """
         Initializes the environment.
+        :param height: the height of the environment (height of weighted map)
+        :param width: the width of the environment (width of weighted map)
+        :param min_distance: the minimum distance a street can have
+        :param max_distance: the maximum distance a street can have
+        :param min_traffic: the minimum traffic flow factor a street can have
+        :param max_traffic: the maximum traffic flow factor a street can have
+        :param dist_matrix: the distance matrix which contains the length between all connected crossings
+        :param traffic_matrix: the traffic matrix which contains the traffic flow between all connected crossings
+        :param traffic_lights_list: The list of manually created traffic lights
+        :param init_pos: the manually chosen initial position of the car
+        :param packages: the manually chosen packages (list of coordinates) that need to be delivered
+        :param num_packages: the amount packages which should be generated  randomly
+        :param init_random: activates/deactivates random numbers for distance and traffic matrix (non random is 1)
+        :param one_way: activates/deactivates the random creation of one-way streets
+        :param construction_sites: activates/deactivates the random creation of construction sites
+        :param traffic_lights: activates/deactivates the random creation of traffic lights
         """
         super(CityEnv, self).__init__()
         # throw error message if environment is not possible
@@ -33,13 +50,13 @@ class CityEnv(gym.Env):
                                 min_traffic, max_traffic, num_packages]) > 0), "all arguments must be non-negative!"
         assert min_distance < max_distance and min_traffic < max_traffic, \
             "minimum values have to be lower than maximum values!"
-        assert (dist_matrix is not None and traffic_matrix is not None) or \
-               (dist_matrix is None and traffic_matrix is None), "if one matrix is defined the other must be too!"
-        if dist_matrix is not None:
+        assert (dist_matrix and traffic_matrix) or \
+               (not dist_matrix and not traffic_matrix), "if one matrix is defined the other must be too!"
+        if dist_matrix:
             assert np.all(dist_matrix >= 0), "all entries in the distance matrix must not be non-negative!"
-        if traffic_matrix is not None:
+        if traffic_matrix:
             assert np.all(traffic_matrix >= 0), "all entries in the traffic matrix must not be non-negative!"
-        if dist_matrix is not None and traffic_matrix is not None:
+        if dist_matrix and traffic_matrix:
             # check if distance and traffic matrix have the same dimension
             assert dist_matrix.shape == traffic_matrix.shape, \
                 f"traffic and distance matrix need to have the same dimension!"
@@ -50,10 +67,20 @@ class CityEnv(gym.Env):
             matrix_height = height * width
             assert (matrix_height == dist_matrix.shape[0]) and (matrix_height == dist_matrix.shape[1]) and \
                    (matrix_height == traffic_matrix.shape[0]) and (matrix_height == traffic_matrix.shape[1]), \
-                   "given height and width do not match distance matrix length!"
-
-        self.CO2 = 0.142    # constant for co2 emission per meter
-        self.PENALTY = -1000  # reward penalty for illegal action
+                "given height and width do not match distance matrix length!"
+        # check if manually given initial pos is correctly placed
+        if init_pos:
+            assert init_pos[0] < self.height and init_pos[1] < self.width, "initial position is out of bound!"
+        # check if manually given traffic lights are correctly placed
+        if traffic_lights_list:
+            correct_placed = True
+            for traffic_light in traffic_lights_list:
+                if traffic_light[0] >= self.height or traffic_light[1] >= self.width:
+                    correct_placed = False
+                    break
+            assert correct_placed, "traffic lights are out of bound!"
+        self.CO2 = 0.142  # constant for co2 emission per meter (diesel car)
+        self.PENALTY = -250  # reward penalty for illegal action
         self.height = height
         self.width = width
 
@@ -104,7 +131,8 @@ class CityEnv(gym.Env):
         # Check if city graph is connected
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
-                assert self.validate_accessibility(i, j), f"{self.matrix_height} The city graph is not for nodes {i} and {j} connected!"
+                assert self.validate_accessibility(i,
+                                                   j), f"{self.matrix_height} The city graph is not for nodes {i} and {j} connected!"
 
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
@@ -115,8 +143,9 @@ class CityEnv(gym.Env):
             self.num_one_way = 0
             self.num_construction_sites = 0
             self.num_traffic_lights = 0
-        self.traffic_lights = []  # list of coordinates with traffic lights
-
+        # list of coordinates with traffic lights
+        self.traffic_lights = traffic_lights_list if traffic_lights_list else []
+        # randomly generate packages if there are no manually given packages
         if packages is None:
             assert init_random, "If no packages are defined, init_random must be set to True!"
             packages = []
@@ -128,13 +157,15 @@ class CityEnv(gym.Env):
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
         logging.debug(f'Coordinates of packages are: {packages}')
-
-        while True:
-            self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
-            if self.init_pos not in self.packages:
-                self.pos = self.init_pos
-                self.prev_pos = self.init_pos
-                break
+        self.init_pos = init_pos
+        # generate initialization position randomly but not the same place like a package
+        if not self.init_pos:
+            while True:
+                self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
+                if self.init_pos not in self.packages:
+                    self.pos = self.init_pos
+                    self.prev_pos = self.init_pos
+                    break
         logging.debug(f'The start position is {self.init_pos}')
 
         self.weighted_map = self.get_map()
@@ -145,7 +176,7 @@ class CityEnv(gym.Env):
         if construction_sites:
             self.generate_construction_sites()
         logging.info("construction sites created")
-        if traffic_lights:
+        if traffic_lights and not traffic_lights_list:
             self.generate_traffic_lights()
         logging.debug(f'Distance matrix:\n{dist_matrix}')
         logging.debug(f'Traffic matrix:\n{traffic_matrix}')
@@ -169,6 +200,10 @@ class CityEnv(gym.Env):
     def step(self, action):
         """
         Performs a step on the environment and calculates the specific reward of this step.
+
+        :param action: the action to take for the current step
+
+        :return:
         """
         action = int(action)
         if action < 0 or action >= 4:
@@ -185,13 +220,6 @@ class CityEnv(gym.Env):
         elif action == RIGHT and pos_y < self.width - 1:
             new_pos_y += 1
         else:
-            """
-            dist_to_next_package = self.height * self.width
-            reward = 0
-            for pack_x, pack_y in self.packages:
-                dist_to_next_package = min(dist_to_next_package, abs(pack_x - pos_x) + abs(pack_y - pos_y))
-                reward = 1 / dist_to_next_package
-            """
             reward = self.PENALTY
             return np.array([pos_x, pos_y, len(self.packages)]).astype(np.int32), reward, False, {
                 'render.modes': ['console']}
@@ -216,6 +244,10 @@ class CityEnv(gym.Env):
         done = packages_count == 0
 
         meta_info = {'render.modes': ['console']}
+        if (new_pos_x, new_pos_y) in self.already_driven:
+            reward = self.PENALTY
+            return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.int32), reward, done, {
+                'render.modes': ['console']}
         self.already_driven.append((new_pos_x, new_pos_y))
         return np.array([new_pos_x, new_pos_y, packages_count]).astype(np.int32), reward * self.CO2, done, meta_info
 
@@ -228,6 +260,7 @@ class CityEnv(gym.Env):
     def render(self, mode="human"):
         """
         Renders the environment.
+        :param mode: the mode for rendering
         """
         pass
 
@@ -318,6 +351,8 @@ class CityEnv(gym.Env):
     def get_map(self):
         """
         Computes the weight matrix by multiplying the distance matrix with the traffic matrix
+
+        :return: calculated weighted map of town
         """
         return np.round(self.dist_matrix * self.traffic_matrix, 2)
 
@@ -366,8 +401,8 @@ class CityEnv(gym.Env):
         g = nx.DiGraph()
         pos = {}
         for v, p in zip(self.vertices_matrix.reshape(-1).tolist(), [
-            (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)
-        ]):
+            (x, y) for y in range(self.height - 1, -1, -1) for x in range(self.width)]
+        ):
             pos[v] = p
             for next_v in np.argwhere(self.dist_matrix[:, v] > 0).reshape(-1):
                 weight = self.weighted_map[next_v, v]
@@ -413,6 +448,8 @@ class CityEnv(gym.Env):
         """
         Chooses the action with the highest edge weight. If all possible edges from a node are already driven
         the function chooses randomly a path to avoid an endless loop.
+
+        :return: the next action for the agent inside the environment
         """
         i, j = self.pos
         start_vertex = self.vertices_matrix[i, j]

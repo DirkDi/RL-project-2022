@@ -183,8 +183,16 @@ def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> Def
 
 
 def hyper_parameter_grid_search(env: gym.Env):
+    """
+    Function to find the best q-table with hyperparameter search.
+
+    :param env: the environment to test for
+    """
     best_r = float("-inf")
     best_q = None
+    best_alpha = None
+    best_gamma = None
+    best_epsilon = None
     for alpha in np.round(np.arange(0.1, 1, 0.2), 1):
         for gamma in np.round(np.arange(0.1, 1, 0.2), 1):
             for epsilon in np.round(np.arange(0.1, 1, 0.2), 1):
@@ -192,8 +200,11 @@ def hyper_parameter_grid_search(env: gym.Env):
                 cum_r, actions = evaluate_sarsa_policy(q, env)
                 if cum_r > best_r:
                     best_r = cum_r
-                    logging.info(alpha, gamma, epsilon)
-                    logging.info(cum_r)
+                    best_q = q
+                    best_alpha = alpha
+                    best_gamma = gamma
+                    best_epsilon = epsilon
+                    logging.debug(alpha, gamma, epsilon)
+                    logging.debug(cum_r, q)
                     if len(actions) <= 50:
-                        logging.info(actions)
-    return
+                        logging.debug(actions)
