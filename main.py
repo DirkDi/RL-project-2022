@@ -52,6 +52,7 @@ def show_result(grid_name, cum_r, actions):
 def show_average_results(agent_name, reward_s, reward_m, reward_l):
     """
     Shows the average reward values for the small environment (3x3), medium environment (5x5) and large one (10x10)
+
     :param agent_name: the name of the used agent
     :param reward_s: the reward list of the small environment over all seeds
     :param reward_m: the reward list of the medium environment over all seeds
@@ -97,7 +98,7 @@ def main():
     average_reward_s = []
     average_reward_m = []
     average_reward_l = []
-    if mode == 'normal':    # uses SARSA to train and evaluate
+    if mode == 'normal':  # uses SARSA to train and evaluate
         episodes = [100000, 100000, 250000]  # num of episodes for [small, medium, large] grid sizes
         for seed in seeds:
             num_episodes = episodes[0]
@@ -121,7 +122,7 @@ def main():
             average_reward_l.append(cum_r)
             show_result("10x10 grid", cum_r, actions)
         show_average_results("SARSA", average_reward_s, average_reward_m, average_reward_l)
-    elif mode == 'random':
+    elif mode == 'random':  # random baseline
         for seed in seeds:
             # calculate small environment and store value
             cum_r, actions = test_random_small(seed)
@@ -136,7 +137,7 @@ def main():
             show_result("10x10 grid", cum_r, actions)
             average_reward_l.append(cum_r)
         show_average_results("random", average_reward_s, average_reward_m, average_reward_l)
-    elif mode == 'min_weight':
+    elif mode == 'min_weight':  # minimum weight baseline
         for seed in seeds:
             # calculate small environment and store value
             cum_r, actions = test_min_weight_small(seed)
@@ -151,7 +152,7 @@ def main():
             show_result("10x10 grid", cum_r, actions)
             average_reward_l.append(cum_r)
         show_average_results("minimum weight agent", average_reward_s, average_reward_m, average_reward_l)
-    elif mode == 'max_weight':
+    elif mode == 'max_weight':  # maximum weight baseline
         for seed in seeds:
             # calculate small environment and store value
             cum_r, actions = test_max_weight_small(seed)
@@ -169,7 +170,6 @@ def main():
     elif mode == 'a2c':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
-            check_env(env, warn=True)
             model = a2c_agent(env, total_timesteps=100000, log_interval=100)
             cum_r, actions = run_agent(env, model)
             show_result("3x3 grid", cum_r, actions)
@@ -178,7 +178,6 @@ def main():
     elif mode == 'ppo':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
-            check_env(env, warn=True)
             model = ppo_agent(env, total_timesteps=100000)
             cum_r, actions = run_agent(env, model)
             show_result("3x3 grid", cum_r, actions)

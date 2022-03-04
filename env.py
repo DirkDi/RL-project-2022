@@ -27,6 +27,7 @@ class CityEnv(gym.Env):
                  traffic_lights=True):
         """
         Initializes the environment.
+
         :param height: the height of the environment (height of weighted map)
         :param width: the width of the environment (width of weighted map)
         :param min_distance: the minimum length a street can have (distance between nodes/crossings)

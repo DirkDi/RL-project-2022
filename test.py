@@ -237,6 +237,7 @@ def test_sarsa_large(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 11
 def test_agent(name, seed, tests):
     """
     Tests specific agent with the corresponding test functions.
+
     :param name: name of the agent
     :param seed: an integer to set the random seed
     :param tests: array which contains the functions for tests
