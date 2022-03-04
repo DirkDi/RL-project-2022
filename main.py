@@ -101,6 +101,7 @@ def main():
     if mode == 'normal':  # uses SARSA to train and evaluate
         episodes = [100000, 100000, 250000]  # num of episodes for [small, medium, large] grid sizes
         for seed in seeds:
+            logging.info(f"Start experiments for seed: {seed}")
             num_episodes = episodes[0]
             if not Path(f"q_sarsa_small_{seed}.csv").is_file():
                 train_sarsa_small(num_episodes, seed, save=True)

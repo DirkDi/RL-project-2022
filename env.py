@@ -294,26 +294,34 @@ class CityEnv(gym.Env):
         always maintaining reachability to all nodes.
         """
         used_points = []
+        # generate n one-way streets
         for i in range(self.num_one_way):
             taken_points = True
             start_vertex, target_vertex = -1, -1
             no_path = True
             amount_points = self.height * self.width
             counter = 0
+            # search path that is possible and doesn't disturb accessibility (if after amount_points no path is found
+            # ignore the creation of this one-way street for one time
             while no_path and counter <= amount_points:
+                # while points are chosen that are already connect with a one-way street search for other ones
                 while taken_points:
+                    # start of one-way street
                     start_vertex = self.vertices_matrix[
                         random.randint(0, self.height - 1), random.randint(0, self.width - 1)]
                     target_idx = np.where(self.dist_matrix[:, start_vertex] > 0)[0]  # possible edges for one way
-                    target_vertex = target_idx[random.randint(0, len(target_idx) - 1)]
+                    target_vertex = target_idx[random.randint(0, len(target_idx) - 1)]  # end of one-way street
+                    # check if points are already used
                     if start_vertex not in used_points and target_vertex not in used_points:
                         taken_points = False
+                # set one-way street inside the matrices
                 old_dist = self.dist_matrix[start_vertex, target_vertex]
                 old_traffic = self.traffic_matrix[start_vertex, target_vertex]
                 old_weight = self.weighted_map[start_vertex, target_vertex]
                 self.dist_matrix[start_vertex, target_vertex] = 0
                 self.traffic_matrix[start_vertex, target_vertex] = 0
                 self.weighted_map[start_vertex, target_vertex] = 0
+                # check accessibility and if there is no access restore old values
                 no_path = not self.validate_accessibility(start_vertex, target_vertex)
                 if no_path:
                     self.dist_matrix[start_vertex, target_vertex] = old_dist
@@ -335,14 +343,20 @@ class CityEnv(gym.Env):
             start_vertex, target_vertex = -1, -1
             no_path = True
             counter = 0
+            # search path that is possible and doesn't disturb accessibility (if after amount_points no path is found
+            # ignore the creation of this construction site for one time
             while no_path and counter <= amount_points:
+                # while points are chosen that have already a construction site search for other ones
                 while taken_points:
+                    # start of construction site
                     start_vertex = self.vertices_matrix[
                         random.randint(0, self.height - 1), random.randint(0, self.width - 1)]
                     target_idx = np.where(self.dist_matrix[:, start_vertex] > 0)[0]  # possible edges for one way
-                    target_vertex = target_idx[random.randint(0, len(target_idx) - 1)]
+                    target_vertex = target_idx[random.randint(0, len(target_idx) - 1)]  # end of construction site
+                    # check if points are already used
                     if start_vertex not in used_points and target_vertex not in used_points:
                         taken_points = False
+                # set construction site inside the matrices
                 old_dist = self.dist_matrix[start_vertex, target_vertex]
                 old_traffic = self.traffic_matrix[start_vertex, target_vertex]
                 old_weight = self.weighted_map[start_vertex, target_vertex]
@@ -352,6 +366,7 @@ class CityEnv(gym.Env):
                 self.dist_matrix[target_vertex, start_vertex] = 0
                 self.traffic_matrix[target_vertex, start_vertex] = 0
                 self.weighted_map[target_vertex, start_vertex] = 0
+                # check accessibility and if there is no access restore old values
                 no_path = not (self.validate_accessibility(start_vertex, target_vertex) and
                                self.validate_accessibility(target_vertex, start_vertex))
                 if no_path:
