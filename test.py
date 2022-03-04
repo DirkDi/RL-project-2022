@@ -25,7 +25,7 @@ def test_random_small(seed: int = 1111, rand: bool = True, draw_map: bool = Fals
     return cum_r, actions
 
 
-def test_random_medium(seed: int = 2222, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
+def test_random_medium(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the randomly acting agent on the environment of field 5 x 5
 
@@ -41,7 +41,7 @@ def test_random_medium(seed: int = 2222, rand: bool = True, draw_map: bool = Fal
     return cum_r, actions
 
 
-def test_random_large(seed: int = 3333, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
+def test_random_large(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the randomly acting agent on the environment of field 10 x 10
 
@@ -73,7 +73,7 @@ def test_min_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = 
     return cum_r, actions
 
 
-def test_min_weight_medium(seed: int = 2222, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
+def test_min_weight_medium(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the minimal weight searching agent on the environment of field 5 x 5
 
@@ -89,7 +89,7 @@ def test_min_weight_medium(seed: int = 2222, rand: bool = True, draw_map: bool =
     return cum_r, actions
 
 
-def test_min_weight_large(seed: int = 3333, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
+def test_min_weight_large(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the minimal weight searching agent on the environment of field 10 x 10
 
@@ -121,7 +121,7 @@ def test_max_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = 
     return cum_r, actions
 
 
-def test_max_weight_medium(seed: int = 2222, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
+def test_max_weight_medium(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the maximal weight searching agent on the environment of field 5 x 5
 
@@ -137,7 +137,7 @@ def test_max_weight_medium(seed: int = 2222, rand: bool = True, draw_map: bool =
     return cum_r, actions
 
 
-def test_max_weight_large(seed: int = 3333, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
+def test_max_weight_large(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
     Runs the maximal weight searching agent on the environment of field 10 x 10
 
