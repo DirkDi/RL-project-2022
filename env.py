@@ -452,6 +452,7 @@ class CityEnv(gym.Env):
                     actions.append(i)
                     if (a, b) in self.traffic_lights:
                         weight *= 1.2
+                    weight *= self.CO2
                     # Update the weight if a better weight was found.
                     # It also should not be already visited to avoid endless loops
                     if weight < min_weight and (a, b) not in self.already_driven:
@@ -481,6 +482,7 @@ class CityEnv(gym.Env):
                     actions.append(i)
                     if (a, b) in self.traffic_lights:
                         weight *= 1.2
+                    weight *= self.CO2
                     # Update the weight if a better weight was found.
                     # It also should not be already visited to avoid endless loops
                     if weight > min_weight and (a, b) not in self.already_driven:
