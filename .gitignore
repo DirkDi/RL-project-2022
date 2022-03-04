@@ -1,5 +1,9 @@
+# Ignore specific csvs
+q_sarsa_save_load_test.csv
+
 # Ignore idea
 .idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
