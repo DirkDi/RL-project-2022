@@ -156,15 +156,15 @@ def main():
             # calculate small environment and store value
             cum_r, actions = test_max_weight_small(seed)
             show_result("3x3 grid", cum_r, actions)
-            average_reward_s += cum_r
+            average_reward_s.append(cum_r)
             # calculate medium environment and store value
             cum_r, actions = test_max_weight_medium(seed)
             show_result("5x5 grid", cum_r, actions)
-            average_reward_m += cum_r
+            average_reward_m.append(cum_r)
             # calculate large environment and store value
             cum_r, actions = test_max_weight_large(seed)
             show_result("10x10 grid", cum_r, actions)
-            average_reward_l += cum_r
+            average_reward_l.append(cum_r)
         show_average_results("maximum weight agent", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'a2c':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
