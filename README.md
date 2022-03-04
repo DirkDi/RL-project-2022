@@ -76,6 +76,8 @@ several color-codes on the same node. For example a node
 that has a package and a traffic light will only be shown
 in red. 
 
+![image info](./images/Figure_1.png)
+
 Furthermore, the files "training.py" and "test.py" can be
 called individually to train the (SARSA) agents and
 evaluate the agents respectively. But be aware that you have
