@@ -2,7 +2,6 @@ import numpy as np
 
 from typing import Tuple, List, DefaultDict
 
-from env import CityEnv
 from env_creator import create_small_env, create_medium_env, create_large_env
 from sarsa import sarsa, save_q
 

@@ -29,15 +29,15 @@ seed and at one of the preset sizes (small: 3x3,
 medium: 5x5, large: 10x10) you need to make sure there 
 are no saved Q tables. Saved Q tables can be found in 
 the project folder where the main.py is also stored. 
-They are recognizable by alwasy  being saved as 
+They are recognizable by always  being saved as 
 q_sarsa_{small/medium/large}_{seed}.csv. Once you made
 sure there are no Q tables for the chosen seed and size
 training and evaluation can be started by running the main
-using "python main.py" in the command line of a terminal
+using `python main.py` in the command line of a terminal
 that is opened in the project folder.
 
 To modify the training several parameters can be used. 
-For the sake of reproducibility the only paramaters 
+For the sake of reproducibility the only parameters 
 explained here are the ones necessary to reproduce the 
 results. The other parameters can be ignored and are 
 explained in the code comments of main.py. While the 
@@ -45,26 +45,26 @@ results for the SARSA agent can be reproduced simply by
 running main.py the other agents and baselines require 
 additional parameters.
 
-To run the A2C agent "python main.py -m a2c" needs to be
-called and to run the PPO agent "python main.py -m ppo"
+To run the A2C agent `python main.py -m a2c` needs to be
+called and to run the PPO agent `python main.py -m ppo`
 needs to be called. All internal parameters like grid-size,
-number of timesteps, starting position, constraints and
+number of time steps, starting position, constraints and
 position of packages are preset and do not need to be set 
 manually. Also of note here is that A2C and PPO only 
 produce sensible results for the small 3x3 grid, therefore
 nonsensical results for 5x5 and 10x10 do not mean that
 you have followed the instructions wrongly.
 
-To reproduce the baseline results additional parametes 
+To reproduce the baseline results additional parameters 
 have to be added similarly to the other agents. To recreate
-the random baseline "python main.py -m random" has to be 
-run, to recreate the minimum weight baseline "python main.py
--m min_weight" has to be run and to recreate the maximum
-weight baseline "python main.py -m max_weight" has to be
+the random baseline `python main.py -m random` has to be 
+run, to recreate the minimum weight baseline `python main.py
+-m min_weight` has to be run and to recreate the maximum
+weight baseline `python main.py -m max_weight` has to be
 run.
 
 To show a graphic representation of the created 
-environment "-g" can be called as an additional parameter
+environment `-g` can be called as an additional parameter
 that shows a color-coded version of the environment as a
 grid. An example graph can be seen below. The nodes are
 color-coded as follows: green (starting point), 
@@ -77,6 +77,9 @@ that has a package and a traffic light will only be shown
 in red. 
 
 Furthermore, the files "training.py" and "test.py" can be
-called individually but this does not affect the 
-reproducibility and using "main.py" instead is highly
+called individually for only train the (SARSA) agents
+respectively evaluate the agents. But be aware that you have
+to run the "training.py" once to save Q tables which will be
+necessary for evaluating the SARSA agents. But this does not
+affect the reproducibility and using "main.py" instead is highly
 recommended.
