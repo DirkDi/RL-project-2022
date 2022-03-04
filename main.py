@@ -23,14 +23,14 @@ def args_parser():
     :return: created argument parser
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--debug", action="store_true", help="debug output")
+    parser.add_argument("-d", "--debug", action="store_true", help="activates debug output")
     parser.add_argument('--mode', '-m', type=str, default='normal',
-                        help='choose the mode normal or experimental (experimental env)')
+                        help='choose the agent mode normal (SARSA agent), random, min_weight, max_weight, ppo or a2c')
     parser.add_argument("--static", action="store_true", help="disables random distance generation")
     parser.add_argument("-o", "--bidirectional", action="store_true", help="deactivates one way streets")
     parser.add_argument("-c", "--interconnected", action="store_true", help="deactivates construction sites")
     parser.add_argument("-t", "--notrafficlights", action="store_true", help="deactivates traffic lights")
-    parser.add_argument("-s", "--seed", type=list, default=[1111, 2222, 3333], help="set the environment seed")
+    parser.add_argument("-s", "--seed", type=list, default=[1111, 2222, 3333], help="set the environment seeds as list")
     parser.add_argument("-g", "--graph", action="store_true", help="show graphic representation of env")
     args = parser.parse_args()
     return args
