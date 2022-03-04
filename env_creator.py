@@ -8,12 +8,13 @@ from env import CityEnv
 def set_seeds(seed):
     """
     Set all random generators used to a specific seed.
+
     :param seed: an integer to set the random seed
     """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-    #torch.use_deterministic_algorithms(True)
+    torch.use_deterministic_algorithms(True)
 
 
 def create_small_env(seed, rand, draw_map):
