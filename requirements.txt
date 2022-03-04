@@ -4,3 +4,4 @@ stable-baselines3==1.4.0
 tqdm==4.62.3
 networkx==2.6.3
 matplotlib
+gym==0.21.0
