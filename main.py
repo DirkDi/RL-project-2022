@@ -1,19 +1,12 @@
-import torch
-import random
 import argparse
-import numpy as np
 from pathlib import Path
-from sarsa import load_q
 from test import test_random_small, test_random_medium, test_random_large, \
     test_min_weight_small, test_min_weight_medium, test_min_weight_large, \
     test_max_weight_small, test_max_weight_medium, test_max_weight_large, \
     test_sarsa_small, test_sarsa_medium, test_sarsa_large
 from training import train_sarsa_small, train_sarsa_medium, train_sarsa_large
-from env import CityEnv
 from env_creator import *
 from sb_agents import *
-from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.env_checker import check_env
 
 
 def args_parser():
