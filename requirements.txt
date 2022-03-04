@@ -1,7 +1,7 @@
 torch
-numpy==1.22.2
+gym==0.19.0
+numpy==1.21.5
 stable-baselines3==1.4.0
 tqdm==4.62.3
 networkx==2.6.3
-matplotlib
-gym==0.21.0
+matplotlib==3.3.4
