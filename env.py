@@ -68,14 +68,7 @@ class CityEnv(gym.Env):
             assert (matrix_height == dist_matrix.shape[0]) and (matrix_height == dist_matrix.shape[1]) and \
                    (matrix_height == traffic_matrix.shape[0]) and (matrix_height == traffic_matrix.shape[1]), \
                 "given height and width do not match distance matrix length!"
-        # check if manually given traffic lights are correctly placed
-        if traffic_lights_list:
-            correct_placed = True
-            for traffic_light in traffic_lights_list:
-                if traffic_light[0] >= self.height or traffic_light[1] >= self.width:
-                    correct_placed = False
-                    break
-            assert correct_placed, "traffic lights are out of bound!"
+
         self.CO2 = 0.142  # constant for co2 emission per meter (diesel car)
         self.PENALTY = -250  # reward penalty for illegal action
         self.height = height
@@ -128,8 +121,7 @@ class CityEnv(gym.Env):
         # Check if city graph is connected
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
-                assert self.validate_accessibility(i,
-                                                   j), f"{self.matrix_height} The city graph is not for nodes {i} and {j} connected!"
+                assert self.validate_accessibility(i, j), "The city graph is not for nodes and connected!"
 
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
@@ -140,8 +132,19 @@ class CityEnv(gym.Env):
             self.num_one_way = 0
             self.num_construction_sites = 0
             self.num_traffic_lights = 0
+
+        # check if manually given traffic lights are correctly placed
+        if traffic_lights_list:
+            correct_placed = True
+            for traffic_light in traffic_lights_list:
+                if traffic_light[0] >= self.height or traffic_light[1] >= self.width:
+                    correct_placed = False
+                    break
+            assert correct_placed, "traffic lights are out of bound!"
+
         # list of coordinates with traffic lights
         self.traffic_lights = traffic_lights_list if traffic_lights_list else []
+
         # randomly generate packages if there are no manually given packages
         if packages is None:
             assert init_random, "If no packages are defined, init_random must be set to True!"
@@ -158,6 +161,8 @@ class CityEnv(gym.Env):
         # check if initial pos is correctly placed if manually given
         if init_pos:
             assert init_pos[0] < self.height and init_pos[1] < self.width, "initial position is out of bound!"
+            if packages:
+                assert init_pos not in packages, "initial position has to be placed on an empty node (no package)!"
 
         # generate initialization position randomly but not the same place like a package
         else:

@@ -44,10 +44,6 @@ class Test(unittest.TestCase):
             CityEnv(height=3, width=3, num_packages=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
 
-        # check
-        with self.assertRaises(AssertionError):
-            CityEnv(init_pos=(-1, -1))
-
         # check if assertion is raised if "max_distance" is < "min_distance" or "max_traffic" < "min_traffic".
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=3, min_distance=5, max_distance=4, one_way=False,
@@ -170,6 +166,22 @@ class Test(unittest.TestCase):
                       construction_sites=False, traffic_lights=False)
         self.assertEqual(env.num_packages, 2)
         self.assertEqual(len(env.packages), 2)
+
+        # check for invalid start positions
+        with self.assertRaises(AssertionError):
+            CityEnv(init_pos=(-1, -1))
+        with self.assertRaises(AssertionError):
+            CityEnv(init_pos=(-1, 1))
+        with self.assertRaises(AssertionError):
+            CityEnv(init_pos=(1, -1))
+        with self.assertRaises(AssertionError):
+            CityEnv(init_pos=(1, 1), packages=[(1, 1)])
+
+        # check for given traffic lights
+        with self.assertRaises(AssertionError):
+            CityEnv(traffic_lights=[(-1, -1)])
+        with self.assertRaises(AssertionError):
+            CityEnv(traffic_lights_list=[(0, 0)], traffic_lights=True)
 
         # check random generated environments using seeds
         set_seeds(1111)
