@@ -298,7 +298,9 @@ class CityEnv(gym.Env):
             taken_points = True
             start_vertex, target_vertex = -1, -1
             no_path = True
-            while no_path:
+            amount_points = self.height * self.width
+            counter = 0
+            while no_path and counter <= amount_points:
                 while taken_points:
                     start_vertex = self.vertices_matrix[
                         random.randint(0, self.height - 1), random.randint(0, self.width - 1)]
@@ -317,7 +319,7 @@ class CityEnv(gym.Env):
                     self.dist_matrix[start_vertex, target_vertex] = old_dist
                     self.traffic_matrix[start_vertex, target_vertex] = old_traffic
                     self.weighted_map[start_vertex, target_vertex] = old_weight
-
+                counter += 1
             used_points += [start_vertex, target_vertex]
         logging.debug(f'One way streets:\n {used_points}, amount: {self.num_one_way}')
 
