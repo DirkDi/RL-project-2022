@@ -11,11 +11,11 @@ from baselines import random_agent, min_weight_agent, max_weight_agent
 
 def test_random_small(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the randomly acting agent on the environment of field 3 x 3
+    Runs the randomly acting agent on the environment with size 3 x 3
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
     :return cum_r: cumulative reward the random agent gained
     :return actions: action sequence the random agent performed
@@ -27,11 +27,11 @@ def test_random_small(seed: int = 1111, rand: bool = True, draw_map: bool = Fals
 
 def test_random_medium(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the randomly acting agent on the environment of field 5 x 5
+    Runs the randomly acting agent on the environment with size 5 x 5
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
     :return cum_r: cumulative reward the random agent gained
     :return actions: action sequence the random agent performed
@@ -43,11 +43,11 @@ def test_random_medium(seed: int = 1111, rand: bool = True, draw_map: bool = Fal
 
 def test_random_large(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the randomly acting agent on the environment of field 10 x 10
+    Runs the randomly acting agent on the environment wiht size 10 x 10
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
     :return cum_r: cumulative reward the random agent gained
     :return actions: action sequence the random agent performed
@@ -59,14 +59,14 @@ def test_random_large(seed: int = 1111, rand: bool = True, draw_map: bool = Fals
 
 def test_min_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the minimal weight searching agent on the environment of field 3 x 3
+    Runs the minimal weight searching agent on the environment with size 3 x 3
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :return cum_r: cumulative reward the random agent gained
-    :return actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the min_weight agent gained
+    :return actions: action sequence the min_weight agent performed
     """
     env = create_small_env(seed, rand, draw_map)
     cum_r, actions = min_weight_agent(env)
@@ -75,14 +75,14 @@ def test_min_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = 
 
 def test_min_weight_medium(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the minimal weight searching agent on the environment of field 5 x 5
+    Runs the minimal weight searching agent on the environment wiht size 5 x 5
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :return cum_r: cumulative reward the random agent gained
-    :return actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the min_weight agent gained
+    :return actions: action sequence the min_weight agent performed
     """
     env = create_medium_env(seed, rand, draw_map)
     cum_r, actions = min_weight_agent(env)
@@ -91,14 +91,14 @@ def test_min_weight_medium(seed: int = 1111, rand: bool = True, draw_map: bool =
 
 def test_min_weight_large(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the minimal weight searching agent on the environment of field 10 x 10
+    Runs the minimal weight searching agent on the environment with size 10 x 10
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :return cum_r: cumulative reward the random agent gained
-    :return actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the min_weight agent gained
+    :return actions: action sequence the min_weight agent performed
     """
     env = create_large_env(seed, rand, draw_map)
     cum_r, actions = min_weight_agent(env)
@@ -107,14 +107,14 @@ def test_min_weight_large(seed: int = 1111, rand: bool = True, draw_map: bool = 
 
 def test_max_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the maximal weight searching agent on the environment of field 3 x 3
+    Runs the maximal weight searching agent on the environment with size 3 x 3
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :return cum_r: cumulative reward the random agent gained
-    :return actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the max_weight agent gained
+    :return actions: action sequence the max_weight agent performed
     """
     env = create_small_env(seed, rand, draw_map)
     cum_r, actions = max_weight_agent(env)
@@ -123,14 +123,14 @@ def test_max_weight_small(seed: int = 1111, rand: bool = True, draw_map: bool = 
 
 def test_max_weight_medium(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the maximal weight searching agent on the environment of field 5 x 5
+    Runs the maximal weight searching agent on the environment with size 5 x 5
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :return cum_r: cumulative reward the random agent gained
-    :return actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the max_weight agent gained
+    :return actions: action sequence the max_weight agent performed
     """
     env = create_medium_env(seed, rand, draw_map)
     cum_r, actions = max_weight_agent(env)
@@ -139,14 +139,14 @@ def test_max_weight_medium(seed: int = 1111, rand: bool = True, draw_map: bool =
 
 def test_max_weight_large(seed: int = 1111, rand: bool = True, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the maximal weight searching agent on the environment of field 10 x 10
+    Runs the maximal weight searching agent on the environment with size 10 x 10
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :return cum_r: cumulative reward the random agent gained
-    :return actions: action sequence the random agent performed
+    :return cum_r: cumulative reward the max_weight agent gained
+    :return actions: action sequence the max_weight agent performed
     """
     env = create_large_env(seed, rand, draw_map)
     cum_r, actions = max_weight_agent(env)
@@ -156,13 +156,13 @@ def test_max_weight_large(seed: int = 1111, rand: bool = True, draw_map: bool = 
 def test_sarsa_small(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1111,
                      rand: bool = True, load: bool = False, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the SARSA agent on the environment of field 3 x 3
+    Runs the SARSA agent on the environment with size 3 x 3
 
     :param q: Q table
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
     :param load: boolean flag for loading the Q table
-    :param draw_map: boolean flag for showing the map
+    :param draw_map: boolean flag for drawing the map graph
 
     :return cum_r: cumulative reward the SARSA agent gained
     :return actions: action sequence the SARSA agent performed
@@ -183,13 +183,13 @@ def test_sarsa_small(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 11
 def test_sarsa_medium(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1111,
                       rand: bool = True, load: bool = False, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the SARSA agent on the environment of field 5 x 5
+    Runs the SARSA agent on the environment with size 5 x 5
 
     :param q: Q table
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
     :param load: boolean flag for loading the Q table
-    :param draw_map: boolean flag for showing the map
+    :param draw_map: boolean flag for drawing the map graph
 
     :return cum_r: cumulative reward the SARSA agent gained
     :return actions: action sequence the SARSA agent performed
@@ -210,13 +210,13 @@ def test_sarsa_medium(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1
 def test_sarsa_large(q: Optional[DefaultDict[Tuple, np.ndarray]], seed: int = 1111,
                      rand: bool = True, load: bool = False, draw_map: bool = False) -> Tuple[float, List[int]]:
     """
-    Runs the SARSA agent on the environment of field 10 x 10
+    Runs the SARSA agent on the environment with size 10 x 10
 
     :param q: Q table
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
     :param load: boolean flag for loading the Q table
-    :param draw_map: boolean flag for showing the map
+    :param draw_map: boolean flag for drawing the map graph
 
     :return cum_r: cumulative reward the SARSA agent gained
     :return actions: action sequence the SARSA agent performed

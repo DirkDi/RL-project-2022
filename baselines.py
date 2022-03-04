@@ -5,9 +5,9 @@ from env import CityEnv
 def random_agent(env: gym.Env):
     """
     Solves the environment by performing randomly sampled actions per step.
-    Note that the environment has an own random generator which is not seeded.
+    Note that the environment has its own random generator which is not seeded.
 
-    :param env: an environment which meets the openAI gym specification
+    :param env: an environment that meets the openAI gym specification
 
     :return r_acc: cumulative reward
     :return actions: action sequence
@@ -29,6 +29,7 @@ def random_agent(env: gym.Env):
 def min_weight_agent(env: CityEnv):
     """
     Solves the environment by taking the action with the lowest edge weight per step.
+    Important: Tries to avoid revisiting nodes to prevent loops
 
     :param env: an environment of class CityEnv
 
@@ -52,6 +53,7 @@ def min_weight_agent(env: CityEnv):
 def max_weight_agent(env: CityEnv):
     """
     Solves the environment by taking the action with the highest edge weight per step.
+    Important: Tries to avoid revisiting nodes to prevent loops
 
     :param env: an environment of class CityEnv
 

@@ -15,7 +15,7 @@ RIGHT = 3
 
 class CityEnv(gym.Env):
     """
-    An environment to simulate a city traffic.
+    An environment to simulate city traffic.
     """
 
     def __init__(self, height=3, width=3, min_distance=10, max_distance=100, min_traffic=1, max_traffic=2,
@@ -29,8 +29,8 @@ class CityEnv(gym.Env):
         Initializes the environment.
         :param height: the height of the environment (height of weighted map)
         :param width: the width of the environment (width of weighted map)
-        :param min_distance: the minimum distance a street can have
-        :param max_distance: the maximum distance a street can have
+        :param min_distance: the minimum length a street can have (distance between nodes/crossings)
+        :param max_distance: the maximum length a street can have (distance between nodes/crossings)
         :param min_traffic: the minimum traffic flow factor a street can have
         :param max_traffic: the maximum traffic flow factor a street can have
         :param dist_matrix: the distance matrix which contains the length between all connected crossings
@@ -38,8 +38,8 @@ class CityEnv(gym.Env):
         :param traffic_lights_list: The list of manually created traffic lights
         :param init_pos: the manually chosen initial position of the car
         :param packages: the manually chosen packages (list of coordinates) that need to be delivered
-        :param num_packages: the amount packages which should be generated  randomly
-        :param init_random: activates/deactivates random numbers for distance and traffic matrix (non random is 1)
+        :param num_packages: the amount of packages which should be generated randomly
+        :param init_random: activates/deactivates random numbers for distance and traffic matrix (non-random is 1)
         :param one_way: activates/deactivates the random creation of one-way streets
         :param construction_sites: activates/deactivates the random creation of construction sites
         :param traffic_lights: activates/deactivates the random creation of traffic lights
@@ -53,9 +53,9 @@ class CityEnv(gym.Env):
         assert (dist_matrix is not None and traffic_matrix is not None) or \
                (not dist_matrix and not traffic_matrix), "if one matrix is defined the other must be too!"
         if dist_matrix is not None:
-            assert np.all(dist_matrix >= 0), "all entries in the distance matrix must not be non-negative!"
+            assert np.all(dist_matrix >= 0), "all entries in the distance matrix must be non-negative!"
         if traffic_matrix is not None:
-            assert np.all(traffic_matrix >= 0), "all entries in the traffic matrix must not be non-negative!"
+            assert np.all(traffic_matrix >= 0), "all entries in the traffic matrix must be non-negative!"
         if dist_matrix is not None and traffic_matrix is not None:
             # check if distance and traffic matrix have the same dimension
             assert dist_matrix.shape == traffic_matrix.shape, \
@@ -63,7 +63,7 @@ class CityEnv(gym.Env):
             # check if distance and traffic matrix have the same edges
             dist_idx = np.argwhere(dist_matrix > 0)
             traffic_idx = np.argwhere(traffic_matrix > 0)
-            assert np.array_equal(dist_idx, traffic_idx), "traffic and distance matrix need to have the same edges!"
+            assert np.array_equal(dist_idx, traffic_idx), "traffic and distance matrices need to have the same edges!"
             matrix_height = height * width
             assert (matrix_height == dist_matrix.shape[0]) and (matrix_height == dist_matrix.shape[1]) and \
                    (matrix_height == traffic_matrix.shape[0]) and (matrix_height == traffic_matrix.shape[1]), \
@@ -121,8 +121,9 @@ class CityEnv(gym.Env):
         # Check if city graph is connected
         for i in range(self.matrix_height):
             for j in range(self.matrix_height):
-                assert self.validate_accessibility(i, j), "The city graph is not for nodes and connected!"
+                assert self.validate_accessibility(i, j), f"Can not reach node {j} from node {i}."
 
+        # generates constraints based on min of height / width as  possible maximum number per constraint
         minimal_generating = min(self.height - 1, self.width - 1)
         if minimal_generating:
             self.num_one_way = random.randint(1, min(self.height - 1, self.width - 1))
@@ -173,7 +174,7 @@ class CityEnv(gym.Env):
 
         self.init_pos = init_pos
         self.pos = self.init_pos
-        logging.debug(f'The start position is {self.init_pos}')
+        logging.debug(f'The starting position is {self.init_pos}')
 
         self.weighted_map = self.get_map()
         logging.info("weighted_map created")
@@ -199,6 +200,8 @@ class CityEnv(gym.Env):
     def reset(self):
         """
         Resets the environment to the initial state
+
+        :return: returns the observation space
         """
         self.pos = self.init_pos
         self.packages = self.packages_initial.copy()
@@ -210,12 +213,16 @@ class CityEnv(gym.Env):
 
         :param action: the action to take for the current step
 
-        :return:
+        :return: observation space
+        :return: reward for the taken action
+        :return: done flag, true when all packages have been delivered
+        :return: meta info, contains additional information like render mode
         """
         action = int(action)
         if action < 0 or action >= 4:
             raise RuntimeError(f"{action} is not a valid action (needs to be between 0 and 3)")
 
+        # change car position based on action
         pos_x, pos_y = self.pos
         new_pos_x, new_pos_y = pos_x, pos_y
         if action == UP and pos_x > 0:
@@ -234,6 +241,7 @@ class CityEnv(gym.Env):
         target_vertex = self.vertices_matrix[new_pos_x, new_pos_y]
         dist = self.dist_matrix[target_vertex, start_vertex]
         traffic_flow = self.traffic_matrix[target_vertex, start_vertex]
+
         # action is not allowed if there is no edge between both points (value is 0 for dist & traffic_flow)
         if not dist:
             reward = self.PENALTY
@@ -359,7 +367,7 @@ class CityEnv(gym.Env):
         """
         Computes the weight matrix by multiplying the distance matrix with the traffic matrix
 
-        :return: calculated weighted map of town
+        :return: calculated weighted map of city
         """
         return np.round(self.dist_matrix * self.traffic_matrix, 2)
 
@@ -367,10 +375,10 @@ class CityEnv(gym.Env):
         """
         Help-function to realise one-way streets and construction sites.
         This function is used to check the accessibility/reachability from one node
-        to another ( a path will be searched).
+        to another.
 
-        :param start_vertex: Start point to find a path for.
-        :param target_vertex: End point to find a path for.
+        :param start_vertex: Start point to find a path from.
+        :param target_vertex: End point to find a path to.
 
         :return: boolean where True represents that a path was found and False represents that no path was found.
         """
@@ -426,8 +434,10 @@ class CityEnv(gym.Env):
 
     def get_min_emission_action(self):
         """
-        Chooses the action with the lowest edge weight. If all possible edges from a node are already driven the function
-        chooses randomly a path to avoid an endless loop.
+        Chooses the action with the lowest edge weight. If all possible edges from a node are already driven the
+        function chooses a path randomly to avoid an endless loop.
+
+        :return: the next action for the agent inside the environment
         """
         i, j = self.pos
         start_vertex = self.vertices_matrix[i, j]
@@ -454,7 +464,7 @@ class CityEnv(gym.Env):
     def get_max_emission_action(self):
         """
         Chooses the action with the highest edge weight. If all possible edges from a node are already driven
-        the function chooses randomly a path to avoid an endless loop.
+        the function chooses a path randomly to avoid an endless loop.
 
         :return: the next action for the agent inside the environment
         """

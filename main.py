@@ -97,8 +97,8 @@ def main():
     average_reward_s = []
     average_reward_m = []
     average_reward_l = []
-    if mode == 'normal':
-        episodes = [100000, 100000, 250000]
+    if mode == 'normal':    # uses SARSA to train and evaluate
+        episodes = [100000, 100000, 250000]  # num of episodes for [small, medium, large] grid sizes
         for seed in seeds:
             num_episodes = episodes[0]
             if not Path(f"q_sarsa_small_{seed}.csv").is_file():
@@ -166,21 +166,21 @@ def main():
             show_result("10x10 grid", cum_r, actions)
             average_reward_l += cum_r
         show_average_results("maximum weight agent", average_reward_s, average_reward_m, average_reward_l)
-    elif mode == 'a2c':  # not worked above 3x3 grid size (no useful policy)
+    elif mode == 'a2c':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
             check_env(env, warn=True)
             model = a2c_agent(env, total_timesteps=1000000, log_interval=100)
             cum_r, actions = run_agent(env, model)
             show_result("3x3 grid", cum_r, actions)
-    elif mode == 'ppo':  # not worked above 3x3 grid size (no useful policy)
+    elif mode == 'ppo':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
             check_env(env, warn=True)
             model = ppo_agent(env, total_timesteps=100000)
             cum_r, actions = run_agent(env, model)
             show_result("3x3 grid", cum_r, actions)
-    elif mode == 'dqn':  # no useful policy
+    elif mode == 'dqn':  # does not work (no useful policy)
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
             check_env(env, warn=True)

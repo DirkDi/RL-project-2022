@@ -19,12 +19,12 @@ def set_seeds(seed):
 
 def create_small_env(seed, rand, draw_map):
     """
-    Creates the small environment (3 x 3) with defined packages and a specific random seed.
+    Creates the small environment (3 x 3) with defined packages and a specified random seed.
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
-    :param draw_map: boolean flag for showing the map
     :return: env: created environment
     """
     set_seeds(seed)
@@ -39,8 +39,8 @@ def create_medium_env(seed, rand, draw_map):
     Creates the medium environment (5 x 5) with defined packages and a specific random seed.
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
     :return: env: created environment
     """
@@ -56,8 +56,8 @@ def create_large_env(seed, rand, draw_map):
     Creates the large environment (10 x 10) with defined packages and a specific random seed.
 
     :param seed: an integer to set the random seed
-    :param rand: boolean flag for the randomness of the environment
-    :param draw_map: boolean flag for showing the map
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
+    :param draw_map: boolean flag for drawing the map graph
 
     :return: env: created environment
     """

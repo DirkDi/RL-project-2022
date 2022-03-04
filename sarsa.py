@@ -103,7 +103,7 @@ def sarsa(env: gym.Env, num_episodes: int, q: DefaultDict[Tuple, np.ndarray] = N
         lens.append(episode_length)
         train_steps_list.append(num_performed_steps)
         num_performed_steps = 0
-        # logging.info(f'{episode:4d}/{num_episodes:4d} episodes done, episodes total reward: {cumulative_reward}')
+
         pbar.set_postfix({"episodes total reward": cumulative_reward})
         pbar.update(1)
     logging.info(f'mean training steps for each run: {np.mean(train_steps_list)}')
@@ -114,7 +114,7 @@ def evaluate_sarsa_policy(env: gym.Env, q: DefaultDict[Tuple, np.ndarray]) -> Tu
     """
     Evaluates the Q table on the environment.
 
-    Note that the test loop will be left after 500 steps
+    Note that the test loop will be stopped after 500 steps
     if it seems that the SARSA agent has not learned
     a useful policy (coded in the Q table.)
 
@@ -138,7 +138,7 @@ def evaluate_sarsa_policy(env: gym.Env, q: DefaultDict[Tuple, np.ndarray]) -> Tu
         state = new_state
         k += 1
         if k >= 500:
-            logging.info("probably no solution found")
+            logging.info("No solution found after 500 steps.")
             break
     return cum_r, actions
 
@@ -152,7 +152,7 @@ def save_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa"):
     """
     logging.info("Saving Q table")
     # NOTE: On Windows you have to set the newline flag
-    #       on the empty string to write correctly line by line.
+    #       on the empty string to correctly write line by line.
     with open(file_name + ".csv", "w+", newline="") as fd:
         w = csv.writer(fd)
         pbar = tqdm(total=len(q))
@@ -184,7 +184,8 @@ def load_q(q: DefaultDict[Tuple, np.ndarray], file_name: str = "q_sarsa") -> Def
 
 def hyper_parameter_grid_search(env: gym.Env):
     """
-    Function to find the best q-table with hyperparameter search.
+    Function to find the best Q table with hyper parameter search.
+    Deprecated and not used.
 
     :param env: the environment to test for
     """

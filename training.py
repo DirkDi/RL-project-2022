@@ -10,13 +10,13 @@ def train_sarsa_small(num_episodes: int, seed: int = 1111,
                       rand: bool = True, save: bool = False, draw_map: bool = False
                       ) -> Tuple[List[float], List[int], DefaultDict[Tuple, np.ndarray]]:
     """
-    Trains the SARSA agent on the environment of field 3 x 3
+    Trains the SARSA agent on the environment with size 3 x 3
 
     :param num_episodes: amount of episodes the agents should learn
     :param seed: an integer
-    :param rand: boolean flag for randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
     :param save: boolean flag for saving the Q table
-    :param draw_map: boolean flag for showing the map
+    :param draw_map: boolean flag for drawing the map graph
 
     :return r: list of rewards the agent gained per training episode
     :return l: list of lengths of the episodes the agent trained
@@ -35,13 +35,13 @@ def train_sarsa_medium(num_episodes: int, seed: int = 2222,
                        rand: bool = True, save: bool = False, draw_map: bool = False
                        ) -> Tuple[List[float], List[int], DefaultDict[Tuple, np.ndarray]]:
     """
-    Trains the SARSA agent on the environment of field 5 x 5
+    Trains the SARSA agent on the environment with size 5 x 5
 
     :param num_episodes: amount of episodes the agents should learn
     :param seed: an integer
-    :param rand: boolean flag for randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
     :param save: boolean flag for saving the Q table
-    :param draw_map: boolean flag for showing the map
+    :param draw_map: boolean flag for drawing the map graph
 
     :return r: list of rewards the agent gained per training episode
     :return l: list of lengths of the episodes the agent trained
@@ -59,13 +59,13 @@ def train_sarsa_large(num_episodes: int, seed: int = 3333,
                       rand: bool = True, save: bool = False, draw_map: bool = False
                       ) -> Tuple[List[float], List[int], DefaultDict[Tuple, np.ndarray]]:
     """
-    Trains the SARSA agent on the environment of field 10 x 10
+    Trains the SARSA agent on the environment with size 10 x 10
 
     :param num_episodes: amount of episodes the agents should learn
     :param seed: an integer
-    :param rand: boolean flag for randomness of the environment
+    :param rand: boolean flag to initialize environment randomly or use standard initialization
     :param save: boolean flag for saving the Q table
-    :param draw_map: boolean flag for showing the map
+    :param draw_map: boolean flag for drawing the map graph
 
     :return r: list of rewards the agent gained per training episode
     :return l: list of lengths of the episodes the agent trained
@@ -81,7 +81,7 @@ def train_sarsa_large(num_episodes: int, seed: int = 3333,
 
 def train():
     """
-    Trains SARSA agents for different environments (3x3, 5x5, 10x10) and saves the Q tables.
+    Trains SARSA agents for different environments (3x3, 5x5, 10x10) and different seeds and saves the Q tables.
     """
     seeds = [1111, 2222, 3333]
     num_episodes_small = 10000
