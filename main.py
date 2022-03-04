@@ -170,9 +170,11 @@ def main():
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
             check_env(env, warn=True)
-            model = a2c_agent(env, total_timesteps=1000000, log_interval=100)
+            model = a2c_agent(env, total_timesteps=100000, log_interval=100)
             cum_r, actions = run_agent(env, model)
             show_result("3x3 grid", cum_r, actions)
+            average_reward_s.append(cum_r)
+        show_average_results("A2C", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'ppo':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
             env = create_small_env(seed, True, show_graph)
@@ -180,13 +182,8 @@ def main():
             model = ppo_agent(env, total_timesteps=100000)
             cum_r, actions = run_agent(env, model)
             show_result("3x3 grid", cum_r, actions)
-    elif mode == 'dqn':  # does not work (no useful policy)
-        for seed in seeds:
-            env = create_small_env(seed, True, show_graph)
-            check_env(env, warn=True)
-            model = dqn_agent(env, total_timesteps=100000)
-            cum_r, actions = run_agent(env, model)
-            show_result("3x3 grid", cum_r, actions)
+            average_reward_s.append(cum_r)
+        show_average_results("A2C", average_reward_s, average_reward_m, average_reward_l)
 
 
 if __name__ == '__main__':
