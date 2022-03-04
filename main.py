@@ -125,6 +125,7 @@ def main():
         show_average_results("SARSA", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'random':  # random baseline
         for seed in seeds:
+            logging.info(f"Start experiments for seed: {seed}")
             # calculate small environment and store value
             cum_r, actions = test_random_small(seed)
             show_result("3x3 grid", cum_r, actions)
@@ -140,6 +141,7 @@ def main():
         show_average_results("random", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'min_weight':  # minimum weight baseline
         for seed in seeds:
+            logging.info(f"Start experiments for seed: {seed}")
             # calculate small environment and store value
             cum_r, actions = test_min_weight_small(seed)
             show_result("3x3 grid", cum_r, actions)
@@ -155,6 +157,7 @@ def main():
         show_average_results("minimum weight agent", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'max_weight':  # maximum weight baseline
         for seed in seeds:
+            logging.info(f"Start experiments for seed: {seed}")
             # calculate small environment and store value
             cum_r, actions = test_max_weight_small(seed)
             show_result("3x3 grid", cum_r, actions)
@@ -170,6 +173,7 @@ def main():
         show_average_results("maximum weight agent", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'a2c':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
+            logging.info(f"Start experiments for seed: {seed}")
             env = create_small_env(seed, True, show_graph)
             model = a2c_agent(env, total_timesteps=100000, log_interval=100)
             cum_r, actions = run_agent(env, model)
@@ -178,6 +182,7 @@ def main():
         show_average_results("A2C", average_reward_s, average_reward_m, average_reward_l)
     elif mode == 'ppo':  # does not work above 3x3 grid size (no useful policy)
         for seed in seeds:
+            logging.info(f"Start experiments for seed: {seed}")
             env = create_small_env(seed, True, show_graph)
             model = ppo_agent(env, total_timesteps=100000)
             cum_r, actions = run_agent(env, model)
