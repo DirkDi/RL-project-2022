@@ -40,9 +40,10 @@ To modify the training several parameters can be used.
 For the sake of reproducibility the only parameters 
 explained here are the ones necessary to reproduce the 
 results. The other parameters can be ignored and are 
-explained in the code comments of main.py. While the 
-results for the SARSA agent can be reproduced simply by 
-running main.py the other agents and baselines require 
+explained at the beginning of main.py. Additionally calling
+`python main.py -h` provides an overview of all parameters.
+While the results for the SARSA agent can be reproduced simply 
+by running main.py the other agents and baselines require 
 additional parameters.
 
 To run the A2C agent `python main.py -m a2c` needs to be
