@@ -58,10 +58,9 @@ you have followed the instructions wrongly.
 To reproduce the baseline results additional parameters 
 have to be added similarly to the other agents. To recreate
 the random baseline `python main.py -m random` has to be 
-run, to recreate the minimum weight baseline `python main.py
--m min_weight` has to be run and to recreate the maximum
-weight baseline `python main.py -m max_weight` has to be
-run.
+run, to recreate the minimum weight baseline `python main.py -m min_weight` 
+has to be run and to recreate the maximum weight baseline `python main.py -m max_weight` 
+has to be run.
 
 To show a graphic representation of the created 
 environment `-g` can be called as an additional parameter
@@ -85,3 +84,11 @@ to run the "training.py" or "main.py" once to save Q tables which are
 necessary for evaluating the SARSA agents. But this does not
 affect the reproducibility and using "main.py" instead is highly
 recommended.
+
+### Summarized recommended program calls for reproduction:
+- `python main.py` (SARSA results)
+- `python main.py -m a2c` (A2C results for 3x3 environment)
+- `python main.py -m ppo` (PPO results for 3x3 environments)
+- `python main.py -m random` (random baseline results)
+- `python main.py -m min_weight` (minimum weight baseline results)
+- `python main.py -m max_weight` (maximum weight baseline results)
