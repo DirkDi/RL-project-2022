@@ -16,31 +16,31 @@ class Test(unittest.TestCase):
         """
         # check if assertion is raised if one of the variables "height", "width", "min_distance", "max_distance",
         #                                 "min_traffic", "max_traffic", "num_packages" is lower equals 0.
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # width = -1 is not possible
             CityEnv(height=3, width=-1, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # height = -1 is not possible
             CityEnv(height=-1, width=3, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # width = -1  and height = -1 are not possible
             CityEnv(height=-1, width=-1, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # height and width have to be > 0
             CityEnv(height=0, width=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # min_distance has to be > 0
             CityEnv(height=3, width=3, min_distance=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # min_distance and max_distance have to be > 0
             CityEnv(height=3, width=3, min_distance=0, max_distance=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # min_traffic has to be > 0
             CityEnv(height=3, width=3, min_traffic=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # min_traffic and max_traffic have to be > 0
             CityEnv(height=3, width=3, min_traffic=0, max_traffic=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):  # num_packages has to be > 0
             CityEnv(height=3, width=3, num_packages=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
 
@@ -305,7 +305,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             env.step(4)
         env.reset()
-        # test if unallowed directions are heavily penalized (-1000) and if position won't change after this action
+        # test if forbidden directions are heavily penalized (-1000) and if position won't change after this action
         _, reward, done, _ = env.step(0)
         self.assertEqual(reward, -250)
         self.assertEqual(env.pos, (0, 0))
