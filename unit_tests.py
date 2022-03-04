@@ -44,6 +44,10 @@ class Test(unittest.TestCase):
             CityEnv(height=3, width=3, num_packages=0, one_way=False,
                     construction_sites=False, traffic_lights=False)
 
+        # check
+        with self.assertRaises(AssertionError):
+            CityEnv(init_pos=(-1, -1))
+
         # check if assertion is raised if "max_distance" is < "min_distance" or "max_traffic" < "min_traffic".
         with self.assertRaises(AssertionError):
             CityEnv(height=3, width=3, min_distance=5, max_distance=4, one_way=False,
@@ -291,31 +295,31 @@ class Test(unittest.TestCase):
         env.reset()
         # test if unallowed directions are heavily penalized (-1000) and if position won't change after this action
         _, reward, done, _ = env.step(0)
-        self.assertEqual(reward, -1000)
+        self.assertEqual(reward, -250)
         self.assertEqual(env.pos, (0, 0))
         self.assertFalse(done)
         env.reset()
         _, reward, done, _ = env.step(2)
-        self.assertEqual(reward, -1000)
+        self.assertEqual(reward, -250)
         self.assertEqual(env.pos, (0, 0))
         self.assertFalse(done)
         # test if rewards are correct for allowed steps/actions
         env.reset()
         _, reward, done, _ = env.step(3)
-        self.assertEqual(reward, -5)
+        self.assertEqual(reward, -0.71)
         self.assertEqual(env.pos, (0, 1))
         self.assertFalse(done)
         _, reward, done, _ = env.step(1)
-        self.assertEqual(reward, -5)
+        self.assertEqual(reward, -0.71)
         self.assertEqual(env.pos, (1, 1))
         self.assertTrue(done)
         # test reward of traffic light (add traffic light to environment)
         env.reset()
         env.traffic_lights = [(0, 1)]
         _, reward, _, _ = env.step(3)
-        self.assertEqual(reward, -6)
+        self.assertAlmostEqual(reward, -0.852, 5)
         _, reward, _, _ = env.step(2)
-        self.assertEqual(reward, -5)
+        self.assertEqual(reward, -0.71)
 
     def test_get_max_emission_action(self):
         """

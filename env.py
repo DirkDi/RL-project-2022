@@ -50,13 +50,13 @@ class CityEnv(gym.Env):
                                 min_traffic, max_traffic, num_packages]) > 0), "all arguments must be non-negative!"
         assert min_distance < max_distance and min_traffic < max_traffic, \
             "minimum values have to be lower than maximum values!"
-        assert (dist_matrix and traffic_matrix) or \
+        assert (dist_matrix is not None and traffic_matrix is not None) or \
                (not dist_matrix and not traffic_matrix), "if one matrix is defined the other must be too!"
-        if dist_matrix:
+        if dist_matrix is not None:
             assert np.all(dist_matrix >= 0), "all entries in the distance matrix must not be non-negative!"
-        if traffic_matrix:
+        if traffic_matrix is not None:
             assert np.all(traffic_matrix >= 0), "all entries in the traffic matrix must not be non-negative!"
-        if dist_matrix and traffic_matrix:
+        if dist_matrix is not None and traffic_matrix is not None:
             # check if distance and traffic matrix have the same dimension
             assert dist_matrix.shape == traffic_matrix.shape, \
                 f"traffic and distance matrix need to have the same dimension!"
@@ -68,9 +68,6 @@ class CityEnv(gym.Env):
             assert (matrix_height == dist_matrix.shape[0]) and (matrix_height == dist_matrix.shape[1]) and \
                    (matrix_height == traffic_matrix.shape[0]) and (matrix_height == traffic_matrix.shape[1]), \
                 "given height and width do not match distance matrix length!"
-        # check if manually given initial pos is correctly placed
-        if init_pos:
-            assert init_pos[0] < self.height and init_pos[1] < self.width, "initial position is out of bound!"
         # check if manually given traffic lights are correctly placed
         if traffic_lights_list:
             correct_placed = True
@@ -157,15 +154,20 @@ class CityEnv(gym.Env):
         self.packages = packages.copy()
         self.packages_initial = packages.copy()
         logging.debug(f'Coordinates of packages are: {packages}')
-        self.init_pos = init_pos
+
+        # check if initial pos is correctly placed if manually given
+        if init_pos:
+            assert init_pos[0] < self.height and init_pos[1] < self.width, "initial position is out of bound!"
+
         # generate initialization position randomly but not the same place like a package
-        if not self.init_pos:
+        else:
             while True:
-                self.init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
-                if self.init_pos not in self.packages:
-                    self.pos = self.init_pos
-                    self.prev_pos = self.init_pos
+                init_pos = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
+                if init_pos not in self.packages:
                     break
+
+        self.init_pos = init_pos
+        self.pos = self.init_pos
         logging.debug(f'The start position is {self.init_pos}')
 
         self.weighted_map = self.get_map()
