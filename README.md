@@ -77,9 +77,9 @@ that has a package and a traffic light will only be shown
 in red. 
 
 Furthermore, the files "training.py" and "test.py" can be
-called individually for only train the (SARSA) agents
-respectively evaluate the agents. But be aware that you have
-to run the "training.py" once to save Q tables which will be
+called individually to train the (SARSA) agents and
+evaluate the agents respectively. But be aware that you have
+to run the "training.py" or "main.py" once to save Q tables which are
 necessary for evaluating the SARSA agents. But this does not
 affect the reproducibility and using "main.py" instead is highly
 recommended.
