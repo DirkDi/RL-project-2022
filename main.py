@@ -103,14 +103,14 @@ def main():
             num_episodes = episodes[0]
             if not Path(f"q_sarsa_small_{seed}.csv").is_file():
                 train_sarsa_small(num_episodes, seed, save=True)
-            cum_r, actions = test_sarsa_small(q=None, seed=seed, load=True, draw_map=True)
+            cum_r, actions = test_sarsa_small(q=None, seed=seed, load=True, draw_map=show_graph)
             average_reward_s.append(cum_r)
             show_result("3x3 grid", cum_r, actions)
 
             num_episodes = episodes[1]
             if not Path(f"q_sarsa_medium_{seed}.csv").is_file():
                 train_sarsa_medium(num_episodes, seed, save=True)
-            cum_r, actions = test_sarsa_medium(q=None, seed=seed, load=True, draw_map=True)
+            cum_r, actions = test_sarsa_medium(q=None, seed=seed, load=True, draw_map=show_graph)
             average_reward_m.append(cum_r)
             show_result("5x5 grid", cum_r, actions)
 
